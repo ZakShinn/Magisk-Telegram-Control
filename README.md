@@ -1,8 +1,6 @@
 # TelegramControl
 
-README **song ngữ**: phần **Tiếng Việt** ở trên, **English** ở dưới.
 
----
 
 ## Tiếng Việt
 
