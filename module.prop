@@ -1,0 +1,6 @@
+id=TelegramControl
+name=Điều khiển thiết bị qua Telegram
+version=3.6
+versionCode=11
+author=Zakshin (Hải Nghĩa)
+description=Bot Telegram điều khiển điện thoại (Magisk). Cấu hình token/chat ID qua config.sh hoặc trang web build ZIP. Hỗ trợ status, sóng, pin, hotspot/RNDIS. Cảnh báo pin thấp.

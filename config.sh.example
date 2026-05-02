@@ -1,0 +1,26 @@
+# Đổi tên file này thành config.sh và điền thông tin.
+# Hoặc tải ZIP từ trang web — file config.sh đã được nhúng sẵn.
+TELEGRAM_TOKEN=""
+TELEGRAM_CHAT_ID=""
+
+# SMS_FORWARD=1 — tự động gửi SMS mới (chỉ sau khi bật) lên Telegram.
+# Cần đọc được mmssms.db (sqlite nhúng trong bin/ + root); OTP có thể lộ — cân nhắc kỹ.
+SMS_FORWARD="${SMS_FORWARD:-0}"
+
+# Tuỳ chọn — long polling Telegram (mặc định trong service.sh: 50s / curl max 75s)
+# TG_POLL_TIMEOUT=50
+# TG_CURL_MAX_TIME=75
+
+# TTL tether (iptables mangle): chỉ chạy khi bạn gõ /ttl hoặc /ttl_sync trên Telegram (không tự chạy khi bật hotspot/RNDIS hay lúc boot).
+# Khi gõ /ttl không kèm số: dùng TETHER_TTL_VALUE (nếu đặt) rồi sysctl net.ipv4.ip_default_ttl (fallback 65).
+# TETHER_TTL_FIX chỉ còn tác dụng nếu script ngoài gọi ttl_tether_sync() (bot không gọi nữa).
+TETHER_TTL_FIX="${TETHER_TTL_FIX:-1}"
+# TETHER_TTL_VALUE=65
+
+# Gói AnyDesk (PROJECT_MEDIA).
+# ANYDESK_PKG=com.anydesk.anydeskandroid
+
+# APN (/apn …): chờ sau khi bật lại data trước khi ping/curl kiểm tra.
+# APN_VERIFY_SLEEP=12
+# APN_CURL_MAX_TIME=14
+# APN_VERIFY_URL=http://connectivitycheck.gstatic.com/generate_204

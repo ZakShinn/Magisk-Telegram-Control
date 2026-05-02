@@ -1,0 +1,127 @@
+import fs from "fs";
+import path from "path";
+import JSZip from "jszip";
+import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+
+const TOKEN_RE = /^[0-9]+:[A-Za-z0-9_-]+$/;
+const CHAT_RE = /^-?[0-9]+$/;
+
+function shSingleQuoted(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function jsonBilingual(status: number, vi: string, en: string) {
+  return NextResponse.json({ errorVi: vi, errorEn: en }, { status });
+}
+
+export async function POST(req: Request) {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return jsonBilingual(400, "JSON không hợp lệ.", "Invalid JSON body.");
+  }
+
+  const token =
+    typeof body === "object" && body !== null && "token" in body
+      ? String((body as { token?: unknown }).token ?? "").trim()
+      : "";
+  const chatId =
+    typeof body === "object" && body !== null && "chatId" in body
+      ? String((body as { chatId?: unknown }).chatId ?? "").trim()
+      : "";
+
+  const smsForward =
+    typeof body === "object" &&
+    body !== null &&
+    "smsForward" in body &&
+    Boolean((body as { smsForward?: unknown }).smsForward);
+
+  if (!TOKEN_RE.test(token)) {
+    return jsonBilingual(
+      400,
+      "Bot token không đúng định dạng.",
+      "Bot token format looks invalid.",
+    );
+  }
+
+  if (!CHAT_RE.test(chatId)) {
+    return jsonBilingual(
+      400,
+      "Chat ID không đúng định dạng.",
+      "Chat ID format looks invalid.",
+    );
+  }
+
+  const root = path.join(process.cwd(), "module-files");
+  const needed = [
+    "module.prop",
+    "service.sh",
+    "status.sh",
+    "customize.sh",
+    path.join("lib", "common.sh"),
+    path.join("lib", "sms.sh"),
+    path.join("bin", "sqlite3.arm64"),
+  ];
+
+  for (const rel of needed) {
+    if (!fs.existsSync(path.join(root, rel))) {
+      return jsonBilingual(
+        500,
+        "Thiếu module-files — chạy npm run build trong thư mục web (prebuild đồng bộ + sqlite).",
+        "Missing module-files — run npm run build in web/ (prebuild sync + sqlite).",
+      );
+    }
+  }
+
+  const zip = new JSZip();
+  const folder = zip.folder("TelegramControl");
+  if (!folder) {
+    return jsonBilingual(500, "Không tạo được ZIP.", "Could not create ZIP archive.");
+  }
+
+  const walk = (relDir: string) => {
+    const absDir = path.join(root, relDir);
+    for (const name of fs.readdirSync(absDir)) {
+      const rel = path.join(relDir, name);
+      const abs = path.join(root, rel);
+      const st = fs.statSync(abs);
+      if (st.isDirectory()) walk(rel);
+      else folder.file(rel, fs.readFileSync(abs));
+    }
+  };
+
+  for (const name of fs.readdirSync(root)) {
+    const abs = path.join(root, name);
+    const st = fs.statSync(abs);
+    if (st.isDirectory()) walk(name);
+    else folder.file(name, fs.readFileSync(abs));
+  }
+
+  const smsFlag = smsForward ? "1" : "0";
+
+  const configBody =
+    `# TelegramControl — sinh tự động (đừng chia sẻ file này)\n` +
+    `TELEGRAM_TOKEN=${shSingleQuoted(token)}\n` +
+    `TELEGRAM_CHAT_ID=${shSingleQuoted(chatId)}\n` +
+    `SMS_FORWARD="${smsFlag}"\n`;
+
+  folder.file("config.sh", configBody);
+
+  const buf = await zip.generateAsync({
+    type: "nodebuffer",
+    compression: "DEFLATE",
+    compressionOptions: { level: 9 },
+  });
+
+  return new NextResponse(new Uint8Array(buf), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/zip",
+      "Content-Disposition": 'attachment; filename="TelegramControl.zip"',
+      "Cache-Control": "no-store",
+    },
+  });
+}
