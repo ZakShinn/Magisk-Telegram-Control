@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "prebuild": "node ../scripts/fetch-sqlite.mjs && node scripts/sync-module.mjs",
+    "prebuild": "node scripts/sync-module.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
