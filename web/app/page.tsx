@@ -145,19 +145,6 @@ export default function HomePage() {
 
           <form onSubmit={downloadZip} aria-busy={loading}>
           <div className="field">
-            <label htmlFor="token">{t.tokenLabel}</label>
-            <input
-              id="token"
-              name="token"
-              autoComplete="off"
-              placeholder="123456789:AA..."
-              value={token}
-              onChange={(ev) => setToken(ev.target.value)}
-              spellCheck={false}
-            />
-          </div>
-
-          <div className="field">
             <label htmlFor="chatId">{t.chatLabel}</label>
             <input
               id="chatId"
@@ -166,6 +153,19 @@ export default function HomePage() {
               placeholder={t.chatPh}
               value={chatId}
               onChange={(ev) => setChatId(ev.target.value)}
+              spellCheck={false}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="token">{t.tokenLabel}</label>
+            <input
+              id="token"
+              name="token"
+              autoComplete="off"
+              placeholder="123456789:AA..."
+              value={token}
+              onChange={(ev) => setToken(ev.target.value)}
               spellCheck={false}
             />
           </div>
