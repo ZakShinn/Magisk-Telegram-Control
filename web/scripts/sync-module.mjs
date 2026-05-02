@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..", "..");
 const destRoot = path.resolve(__dirname, "..", "module-files");
 
-const files = ["module.prop", "service.sh", "status.sh"];
+const files = ["module.prop", "service.sh"];
 const libSrc = path.join(repoRoot, "lib");
 const libDst = path.join(destRoot, "lib");
 

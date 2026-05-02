@@ -1,5 +1,5 @@
 # shellcheck shell=sh
-# RNDIS, hotspot USB/Wi‑Fi
+# RNDIS, hotspot (giống bản gốc)
 
 get_rndis_state_simple() {
   usb_state="$(getprop_safe sys.usb.state)"
@@ -39,7 +39,7 @@ ttl_tether_sync() {
 }
 
 handle_rndis_on() {
-  send_code "🔌 <b>RNDIS</b>\nĐang bật USB tether…"
+  send_code "🔌 Bật RNDIS (USB tether)..."
   if command -v svc >/dev/null 2>&1; then
     svc usb setFunctions rndis,adb 2>/dev/null || svc usb setFunctions rndis 2>/dev/null || true
   fi
@@ -48,7 +48,7 @@ handle_rndis_on() {
 }
 
 handle_rndis_off() {
-  send_code "🔌 <b>RNDIS</b>\nĐang tắt USB tether…"
+  send_code "🔌 Tắt RNDIS (USB tether)..."
   if command -v svc >/dev/null 2>&1; then
     svc usb setFunctions mtp,adb 2>/dev/null || svc usb setFunctions mtp 2>/dev/null || true
   fi
@@ -57,20 +57,20 @@ handle_rndis_off() {
 }
 
 handle_hotspot_on() {
-  send_code "📡 <b>Hotspot</b>\nĐang bật…"
+  send_code "📡 Bật hotspot..."
   if cmd wifi start-softap "Zakshin" wpa2 "zakshin@123" >/dev/null 2>&1; then
     /system/bin/ifconfig swlan0 192.168.173.1/24 up 2>/dev/null || true
-    send_code "✅ <b>Hotspot</b>\nĐã bật.\n<i>TTL tether:</i> gõ <code>/ttl</code> hoặc <code>/ttl 65</code> sau khi chia sẻ mạng."
+    send_code "✅ Đã bật hotspot"
   else
-    send_code "❌ <b>Hotspot</b>\nKhông bật được (ROM/quyền có thể hạn chế)."
+    send_code "❌ Không bật được hotspot (ROM/permission có thể hạn chế)"
   fi
 }
 
 handle_hotspot_off() {
-  send_code "📡 <b>Hotspot</b>\nĐang tắt…"
+  send_code "📡 Tắt hotspot..."
   if cmd wifi stop-softap >/dev/null 2>&1; then
-    send_code "✅ <b>Hotspot</b>\nĐã tắt."
+    send_code "✅ Đã tắt hotspot"
   else
-    send_code "❌ <b>Hotspot</b>\nKhông tắt được."
+    send_code "❌ Không tắt được hotspot (ROM/permission có thể hạn chế)"
   fi
 }

@@ -158,11 +158,12 @@ _build_usage_summary_html() {
 }
 
 handle_shutdown() {
-  send_code "🛑 <b>Tắt máy</b>\nĐang thu thập lưu lượng…"
+  send_code "🛑 Đang tắt máy..."
 
   NETS=$(dumpsys netstats 2>/dev/null)
+
   if [ -z "$NETS" ] && [ ! -r /proc/net/dev ]; then
-    send_code "⚠️ Không đọc được netstats — vẫn tắt máy."
+    send_code "⚠️ Không lấy được dumpsys netstats và /proc/net/dev không đọc được. Tiến hành tắt."
     if command -v svc >/dev/null 2>&1; then
       svc power shutdown 2>/dev/null || reboot -p
     else
@@ -171,7 +172,34 @@ handle_shutdown() {
     return 1
   fi
 
-  SUMMARY="$(_build_usage_summary_html "📊 Trước khi tắt máy")"
+  _resolve_totals_vars
+
+  W_RX_H=$(hr_mb "$W_RX"); W_TX_H=$(hr_mb "$W_TX")
+  M_RX_H=$(hr_mb "$M_RX"); M_TX_H=$(hr_mb "$M_TX")
+  R_RX_H=$(hr_mb "$R_RX"); R_TX_H=$(hr_mb "$R_TX")
+  HS_RX_H=$(hr_mb "$HS_RX"); HS_TX_H=$(hr_mb "$HS_TX")
+
+  SUMMARY="📊 <b>Tổng lưu lượng trước tắt máy:</b>\n\n"
+  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi (wlan0):</b> <code>RX ${W_RX_H} | TX ${W_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}📶 <b>Mobile (rmnet*):</b> <code>RX ${M_RX_H} | TX ${M_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}🔌 <b>RNDIS (rndis*):</b> <code>RX ${R_RX_H} | TX ${R_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}📡 <b>Hotspot (p2p0/wlan1/ap0/br0/usb*):</b> <code>RX ${HS_RX_H} | TX ${HS_TX_H}</code>\n"
+
+  if [ "${DEBUG:-0}" = "1" ] && [ -r /proc/net/dev ]; then
+    debug_list=$(awk '
+      NR>2 {
+        line=$0; sub(/^[ \t]+/, "", line)
+        split(line, parts, ":"); iface=parts[1]; split(parts[2], a)
+        rx=a[1]+0; tx=a[9]+0
+        if(iface ~ /^rndis/){ printf("RNDIS %s: RX=%d TX=%d\n", iface, rx, tx) }
+        if(iface=="p2p0" || iface=="wlan1" || iface=="ap0" || iface=="br0" || iface=="usb0" || iface ~ /rmnet_usb/ || iface ~ /^usb/){
+          printf("HOTSPOT %s: RX=%d TX=%d\n", iface, rx, tx)
+        }
+      }
+    ' /proc/net/dev)
+    SUMMARY="${SUMMARY}\n<code>DEBUG interfaces:\n${debug_list}</code>"
+  fi
+
   send_code "$SUMMARY"
   sleep 1
 
@@ -180,15 +208,17 @@ handle_shutdown() {
   else
     reboot -p
   fi
+
   return 0
 }
 
 handle_restart() {
-  send_code "🔁 <b>Khởi động lại</b>\nĐang thu thập lưu lượng…"
+  send_code "🔁 Đang khởi động lại..."
 
   NETS=$(dumpsys netstats 2>/dev/null)
+
   if [ -z "$NETS" ] && [ ! -r /proc/net/dev ]; then
-    send_code "⚠️ Không đọc được netstats — vẫn reboot."
+    send_code "⚠️ Không lấy được dumpsys netstats và /proc/net/dev không đọc được. Tiến hành khởi động lại."
     if command -v svc >/dev/null 2>&1; then
       svc power reboot 2>/dev/null || reboot
     else
@@ -197,7 +227,34 @@ handle_restart() {
     return 1
   fi
 
-  SUMMARY="$(_build_usage_summary_html "📊 Trước khi khởi động lại")"
+  _resolve_totals_vars
+
+  W_RX_H=$(hr_mb "$W_RX"); W_TX_H=$(hr_mb "$W_TX")
+  M_RX_H=$(hr_mb "$M_RX"); M_TX_H=$(hr_mb "$M_TX")
+  R_RX_H=$(hr_mb "$R_RX"); R_TX_H=$(hr_mb "$R_TX")
+  HS_RX_H=$(hr_mb "$HS_RX"); HS_TX_H=$(hr_mb "$HS_TX")
+
+  SUMMARY="📊 <b>Tổng lưu lượng trước khởi động lại:</b>\n\n"
+  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi (wlan0):</b> <code>RX ${W_RX_H} | TX ${W_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}📶 <b>Mobile (rmnet*):</b> <code>RX ${M_RX_H} | TX ${M_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}🔌 <b>RNDIS (rndis*):</b> <code>RX ${R_RX_H} | TX ${R_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}📡 <b>Hotspot (p2p0/wlan1/ap0/br0/usb*):</b> <code>RX ${HS_RX_H} | TX ${HS_TX_H}</code>\n"
+
+  if [ "${DEBUG:-0}" = "1" ] && [ -r /proc/net/dev ]; then
+    debug_list=$(awk '
+      NR>2 {
+        line=$0; sub(/^[ \t]+/, "", line)
+        split(line, parts, ":"); iface=parts[1]; split(parts[2], a)
+        rx=a[1]+0; tx=a[9]+0
+        if(iface ~ /^rndis/){ printf("RNDIS %s: RX=%d TX=%d\n", iface, rx, tx) }
+        if(iface=="p2p0" || iface=="wlan1" || iface=="ap0" || iface=="br0" || iface=="usb0" || iface ~ /rmnet_usb/ || iface ~ /^usb/){
+          printf("HOTSPOT %s: RX=%d TX=%d\n", iface, rx, tx)
+        }
+      }
+    ' /proc/net/dev)
+    SUMMARY="${SUMMARY}\n<code>DEBUG interfaces:\n${debug_list}</code>"
+  fi
+
   send_code "$SUMMARY"
   sleep 1
 
@@ -206,14 +263,15 @@ handle_restart() {
   else
     reboot
   fi
+
   return 0
 }
 
 handle_datausage() {
-  send_code "📡 <b>Lưu lượng realtime</b>\nĐang tính…"
+  send_code "📡 Đang tổng hợp số liệu mạng (realtime)..."
 
   if [ ! -r /proc/net/dev ]; then
-    send_code "⚠️ Không đọc được <code>/proc/net/dev</code>."
+    send_code "⚠️ Không thể đọc /proc/net/dev (quyền hoặc file không tồn tại)."
     return 1
   fi
 
@@ -268,11 +326,11 @@ handle_datausage() {
   R_RX_H=$(hr_mb "$R_RX"); R_TX_H=$(hr_mb "$R_TX")
   HS_RX_H=$(hr_mb "$HS_RX"); HS_TX_H=$(hr_mb "$HS_TX")
 
-  SUMMARY="<b>📊 Lưu lượng realtime</b>\n<code>────────────────────────</code>\n\n"
-  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi</b> <i>(wlan0)</i>\n └ RX <code>${W_RX_H}</code> · TX <code>${W_TX_H}</code>\n\n"
-  SUMMARY="${SUMMARY}📶 <b>Mobile</b>\n └ RX <code>${M_RX_H}</code> · TX <code>${M_TX_H}</code>\n\n"
-  SUMMARY="${SUMMARY}🔌 <b>RNDIS</b>\n └ RX <code>${R_RX_H}</code> · TX <code>${R_TX_H}</code>\n\n"
-  SUMMARY="${SUMMARY}📡 <b>Hotspot</b>\n └ RX <code>${HS_RX_H}</code> · TX <code>${HS_TX_H}</code>\n"
+  SUMMARY="<b>📊 Báo cáo lưu lượng realtime:</b>\n\n"
+  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi (wlan0):</b> <code>RX ${W_RX_H} | TX ${W_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}📶 <b>Mobile (rmnet*):</b> <code>RX ${M_RX_H} | TX ${M_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}🔌 <b>RNDIS (rndis*):</b> <code>RX ${R_RX_H} | TX ${R_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}📡 <b>Hotspot (p2p0/wlan1/ap0/br0/usb*):</b> <code>RX ${HS_RX_H} | TX ${HS_TX_H}</code>\n"
 
   if [ "${DEBUG:-0}" = "1" ]; then
     debug_list=$(awk '
@@ -286,7 +344,7 @@ handle_datausage() {
         }
       }
     ' /proc/net/dev)
-    SUMMARY="${SUMMARY}\n<code>${debug_list}</code>"
+    SUMMARY="${SUMMARY}\n<code>DEBUG interfaces:\n${debug_list}</code>"
   fi
 
   send_code "$SUMMARY"

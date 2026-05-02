@@ -3,7 +3,7 @@
 
 getprop_safe() { getprop "$1" 2>/dev/null || echo ""; }
 
-# API base (token từ config.sh)
+# API base (token từ service.sh)
 BOT_API="https://api.telegram.org/bot${TELEGRAM_TOKEN}"
 
 send_msg() {
@@ -29,39 +29,4 @@ escape_html() {
 
 has_network() {
   curl -s --max-time 5 "${BOT_API}/getMe" | grep -q '"ok":true'
-}
-
-# Giống BotCommand + set_my_commands trong python-telegram — menu gợi ý lệnh trên Telegram.
-telegram_register_bot_commands() {
-  [ -z "${TELEGRAM_TOKEN:-}" ] && return 1
-  command -v curl >/dev/null 2>&1 || return 1
-  f="/data/local/tmp/tg_set_cmds_$$.json"
-  umask 077
-  cat > "$f" <<'JSONEOF'
-{"commands":[
-{"command":"start","description":"Khởi động và xem hướng dẫn"},
-{"command":"help","description":"Danh sách lệnh đầy đủ"},
-{"command":"ping","description":"Ping tới các DNS và thời gian bật máy"},
-{"command":"status","description":"Báo cáo tổng hợp thiết bị"},
-{"command":"signal","description":"Sóng, nhà mạng, loại mạng"},
-{"command":"ip","description":"Địa chỉ IP nội bộ và public"},
-{"command":"battery","description":"Mức pin và trạng thái sạc"},
-{"command":"datausage","description":"Dữ liệu di động và Wi-Fi đã dùng"},
-{"command":"sms","description":"Tin SMS đến gần đây"},
-{"command":"rndis_on","description":"Bật chia sẻ mạng qua USB"},
-{"command":"rndis_off","description":"Tắt chia sẻ mạng qua USB"},
-{"command":"hotspot_on","description":"Bật phát Wi-Fi"},
-{"command":"hotspot_off","description":"Tắt phát Wi-Fi"},
-{"command":"ttl","description":"Đặt TTL khi tether (có hotspot hoặc USB)"},
-{"command":"ttl_sync","description":"Giống /ttl"},
-{"command":"anydesk_fix","description":"Quyền AnyDesk chia sẻ màn hình"},
-{"command":"apn","description":"Thêm preset APN nhà mạng VN (xem help)"},
-{"command":"shutdown","description":"Tắt máy"},
-{"command":"restart","description":"Khởi động lại"}
-]}
-JSONEOF
-  curl -sS --max-time 25 -X POST "${BOT_API}/setMyCommands" \
-    -H "Content-Type: application/json; charset=utf-8" \
-    -d @"$f" >/dev/null 2>&1 || true
-  rm -f "$f" 2>/dev/null || true
 }

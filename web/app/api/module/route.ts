@@ -33,12 +33,6 @@ export async function POST(req: Request) {
       ? String((body as { chatId?: unknown }).chatId ?? "").trim()
       : "";
 
-  const smsForward =
-    typeof body === "object" &&
-    body !== null &&
-    "smsForward" in body &&
-    Boolean((body as { smsForward?: unknown }).smsForward);
-
   if (!TOKEN_RE.test(token)) {
     return jsonBilingual(
       400,
@@ -59,11 +53,8 @@ export async function POST(req: Request) {
   const needed = [
     "module.prop",
     "service.sh",
-    "status.sh",
     "customize.sh",
     path.join("lib", "common.sh"),
-    path.join("lib", "sms.sh"),
-    path.join("bin", "sqlite3.arm64"),
   ];
 
   for (const rel of needed) {
@@ -98,13 +89,10 @@ export async function POST(req: Request) {
     else zip.file(name, fs.readFileSync(abs));
   }
 
-  const smsFlag = smsForward ? "1" : "0";
-
   const configBody =
     `# TelegramControl — sinh tự động (đừng chia sẻ file này)\n` +
     `TELEGRAM_TOKEN=${shSingleQuoted(token)}\n` +
-    `TELEGRAM_CHAT_ID=${shSingleQuoted(chatId)}\n` +
-    `SMS_FORWARD="${smsFlag}"\n`;
+    `TELEGRAM_CHAT_ID=${shSingleQuoted(chatId)}\n`;
 
   zip.file("config.sh", configBody);
 
