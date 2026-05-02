@@ -24,6 +24,11 @@ export async function POST(req: Request) {
     return jsonBilingual(400, "JSON không hợp lệ.", "Invalid JSON body.");
   }
 
+  const anydeskAutoMedia =
+    typeof body === "object" && body !== null && "anydeskAutoMedia" in body
+      ? Boolean((body as { anydeskAutoMedia?: unknown }).anydeskAutoMedia)
+      : false;
+
   const token =
     typeof body === "object" && body !== null && "token" in body
       ? String((body as { token?: unknown }).token ?? "").trim()
@@ -92,7 +97,8 @@ export async function POST(req: Request) {
   const configBody =
     `# TelegramControl — sinh tự động (đừng chia sẻ file này)\n` +
     `TELEGRAM_TOKEN=${shSingleQuoted(token)}\n` +
-    `TELEGRAM_CHAT_ID=${shSingleQuoted(chatId)}\n`;
+    `TELEGRAM_CHAT_ID=${shSingleQuoted(chatId)}\n` +
+    (anydeskAutoMedia ? `ANYDESK_AUTO_MEDIA=1\n` : "");
 
   zip.file("config.sh", configBody);
 

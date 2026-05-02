@@ -21,7 +21,7 @@ export default function HomePage() {
 
   const [token, setToken] = useState("");
   const [chatId, setChatId] = useState("");
-  const [smsForward, setSmsForward] = useState(true);
+  const [anydeskAutoMedia, setAnydeskAutoMedia] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,7 +70,7 @@ export default function HomePage() {
         body: JSON.stringify({
           token: token.trim(),
           chatId: chatId.trim(),
-          smsForward,
+          anydeskAutoMedia,
         }),
       });
       if (!res.ok) {
@@ -174,10 +174,10 @@ export default function HomePage() {
             <label className="checkbox-label">
               <input
                 type="checkbox"
-                checked={smsForward}
-                onChange={(ev) => setSmsForward(ev.target.checked)}
+                checked={anydeskAutoMedia}
+                onChange={(ev) => setAnydeskAutoMedia(ev.target.checked)}
               />
-              <span>{t.smsLabel}</span>
+              <span>{t.anydeskAutoMediaLabel}</span>
             </label>
           </div>
 

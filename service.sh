@@ -6,6 +6,9 @@ TELEGRAM_CHAT_ID="1189961723"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# shellcheck disable=SC1091
+[ -f "${SCRIPT_DIR}/config.sh" ] && . "${SCRIPT_DIR}/config.sh"
+
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/common.sh"
 # shellcheck source=/dev/null
@@ -22,8 +25,12 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "${SCRIPT_DIR}/lib/status.sh"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/monitor.sh"
+# shellcheck source=/dev/null
+[ -f "${SCRIPT_DIR}/lib/anydesk.sh" ] && . "${SCRIPT_DIR}/lib/anydesk.sh"
 
 BOT_OFFSET_FILE="/data/local/tmp/tg_device_bot_offset"
+
+start_anydesk_auto_media_loop || true
 
 if [ -f "$BOT_OFFSET_FILE" ]; then
   OFFSET="$(cat "$BOT_OFFSET_FILE" 2>/dev/null || echo 0)"
