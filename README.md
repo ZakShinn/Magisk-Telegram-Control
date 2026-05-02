@@ -1,6 +1,3 @@
-
-<<<<<<< HEAD
-
 # TelegramControl — điều khiển máy Android qua Telegram  
 **[Tiếng Việt](#vi)** · **[English](#en)**
 
