@@ -1,23 +1,23 @@
 # TelegramControl — điều khiển máy Android qua Telegram
+
 **[Tiếng Việt](#vi)** · **[English](#en)**
 
-## <a id="vi"></a>Tiếng Việt
+## Tiếng Việt
 
 ### Mô tả nhanh
+
 TelegramControl là module Magisk chạy nền (`service.sh`) để nhận lệnh từ Telegram Bot và thực hiện các thao tác cơ bản trên máy.
 
-**Module hiện tại:**
-- **Không dùng `sqlite3`**
-- **Không có** SMS/APN/AnyDesk/TTL
-- `/status` là **tính năng nội bộ**: bot gọi `handle_status_send` trong `lib/status.sh` (không cần chạy `status.sh` độc lập)
-
 ### Cài đặt
-- Cài ZIP module bằng Magisk như bình thường, rồi reboot.
-- Mở `service.sh` và sửa 2 dòng sau cho đúng bot của bạn:
-  - `TELEGRAM_TOKEN="..."`
-  - `TELEGRAM_CHAT_ID="..."`
+
+- Vào trang `magisk-telegram-control.vercel.app`
+- Nhập theo đúng thứ tự:
+  - **Chat ID** (ở trên)
+  - **Bot token** (ở dưới)
+- Tải file ZIP và cài bằng Magisk như bình thường, rồi reboot.
 
 ### Lệnh hỗ trợ
+
 - `/help`, `/start`: xem danh sách lệnh
 - `/status`: báo cáo tổng hợp hệ thống
 - `/signal`: thông tin sóng (nhà mạng, loại mạng, band, dBm)
@@ -30,25 +30,25 @@ TelegramControl là module Magisk chạy nền (`service.sh`) để nhận lện
 - `/restart`: khởi động lại
 
 ### Bảo mật
+
 Hiện bot sẽ lấy `chat_id` từ tin nhắn đến (để trả lời), nên **không chia sẻ bot/token** và **không để người lạ biết bot của bạn**.
 
-## <a id="en"></a>English
+## English
 
 ### Quick overview
+
 TelegramControl is a Magisk module that runs in background (`service.sh`) and listens for Telegram bot commands to control basic device actions.
 
-**Current module behavior:**
-- **No `sqlite3`**
-- **No** SMS/APN/AnyDesk/TTL features
-- `/status` is **internal**: the bot calls `handle_status_send` from `lib/status.sh` (no standalone `status.sh` script)
-
 ### Install
-- Flash the ZIP in Magisk, then reboot.
-- Edit `service.sh` and set:
-  - `TELEGRAM_TOKEN="..."`
-  - `TELEGRAM_CHAT_ID="..."`
+
+- Go to `magisk-telegram-control.vercel.app`
+- Enter (order matters in the UI):
+  - **Chat ID** (top)
+  - **Bot token** (bottom)
+- Download the ZIP, flash it in Magisk, then reboot.
 
 ### Supported commands
+
 - `/help`, `/start`: show commands
 - `/status`: full system snapshot
 - `/signal`: signal/network info
@@ -61,4 +61,5 @@ TelegramControl is a Magisk module that runs in background (`service.sh`) and li
 - `/restart`: reboot
 
 ### Security note
+
 The bot replies based on incoming `chat_id`. **Keep your bot/token private** and do not expose the bot chat to strangers.
