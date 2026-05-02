@@ -76,11 +76,9 @@ export async function POST(req: Request) {
     }
   }
 
+  // Files must live at ZIP root — Magisk only recognizes module.prop / META-INF at archive root,
+  // not inside an extra wrapping folder (would show "not a Magisk module").
   const zip = new JSZip();
-  const folder = zip.folder("TelegramControl");
-  if (!folder) {
-    return jsonBilingual(500, "Không tạo được ZIP.", "Could not create ZIP archive.");
-  }
 
   const walk = (relDir: string) => {
     const absDir = path.join(root, relDir);
@@ -89,7 +87,7 @@ export async function POST(req: Request) {
       const abs = path.join(root, rel);
       const st = fs.statSync(abs);
       if (st.isDirectory()) walk(rel);
-      else folder.file(rel, fs.readFileSync(abs));
+      else zip.file(rel.replace(/\\/g, "/"), fs.readFileSync(abs));
     }
   };
 
@@ -97,7 +95,7 @@ export async function POST(req: Request) {
     const abs = path.join(root, name);
     const st = fs.statSync(abs);
     if (st.isDirectory()) walk(name);
-    else folder.file(name, fs.readFileSync(abs));
+    else zip.file(name, fs.readFileSync(abs));
   }
 
   const smsFlag = smsForward ? "1" : "0";
@@ -108,7 +106,7 @@ export async function POST(req: Request) {
     `TELEGRAM_CHAT_ID=${shSingleQuoted(chatId)}\n` +
     `SMS_FORWARD="${smsFlag}"\n`;
 
-  folder.file("config.sh", configBody);
+  zip.file("config.sh", configBody);
 
   const buf = await zip.generateAsync({
     type: "nodebuffer",

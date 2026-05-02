@@ -21,7 +21,7 @@ export default function HomePage() {
 
   const [token, setToken] = useState("");
   const [chatId, setChatId] = useState("");
-  const [smsForward, setSmsForward] = useState(false);
+  const [smsForward, setSmsForward] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

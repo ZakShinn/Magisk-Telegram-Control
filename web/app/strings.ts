@@ -12,7 +12,7 @@ export const STR = {
     chatLabel: "Chat ID",
     chatPh: "-100xxxxxxxx hoặc số User ID",
     smsLabel:
-      "Bật chuyển tiếp SMS mới lên Telegram (SMS_FORWARD=1). OTP có thể lộ; module đi kèm sqlite3 (Termux), ROM phải cho phép đọc kho SMS.",
+      "Chuyển tiếp SMS mới lên Telegram (SMS_FORWARD=1) — mặc định bật, bỏ tích để tắt. OTP có thể lộ; ROM cần cho phép đọc content://sms / kho SMS.",
     submit: "Tải TelegramControl.zip",
     submitting: "Đang đóng gói…",
     hint:
@@ -42,7 +42,7 @@ export const STR = {
     chatLabel: "Chat ID",
     chatPh: "-100xxxxxxxx or numeric user ID",
     smsLabel:
-      "Forward new SMS to Telegram (SMS_FORWARD=1). OTPs may leak; bundled sqlite3 (Termux) requires ROM access to the SMS database.",
+      "Forward new SMS (SMS_FORWARD=1) — on by default, uncheck to disable. OTPs may leak; ROM must allow SMS provider / database access.",
     submit: "Download TelegramControl.zip",
     submitting: "Building ZIP…",
     hint:

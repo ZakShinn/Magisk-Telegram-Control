@@ -3,41 +3,58 @@
 
 handle_help() {
   send_code "$(cat <<'EOF'
-<b>📖 Danh sách lệnh</b>
-<code>────────────────────────</code>
+<b>📖 Lệnh</b> · chạm tên lệnh hoặc gõ trong chat.
 
-<b>ℹ️ Thông tin</b>
-• <code>/help</code> · <code>/start</code> — xem danh sách lệnh này
-• <code>/status</code> — chạy <code>status.sh</code> gửi báo cáo tổng hợp (một tin riêng sau vài giây)
-• <code>/signal</code> — sóng (RSSI/dBm), loại mạng (LTE/5G…), band nếu đọc được, tên nhà mạng
-• <code>/ip</code> — địa chỉ IPv4/IPv6 trên máy + IP công cộng (qua HTTP)
-• <code>/battery</code> — mức pin, nhiệt độ, trạng thái sạc…
-• <code>/datausage</code> — lưu lượng mobile/Wi‑Fi (thống kê từ hệ thống)
-• <code>/ping</code> — bot còn chạy + thời gian uptime
-• <code>/sms</code> — xem vài tin SMS gần đây <i>(cần đọc được <code>mmssms.db</code> + sqlite nhúng)</i>
+/help /start — hướng dẫn
+/ping — ping DNS + uptime · DNS mặc định chỉnh bằng TG_PING_DNS trong config.sh
+/status — báo cáo máy
+/signal — sóng, nhà mạng, loại mạng
+/ip — IP nội bộ / public
+/battery — pin
+/datausage — lưu lượng
+/sms — vài SMS đến · SMS_FORWARD trong config để tự đẩy tin mới
 
-<b>📩 SMS</b>
-• Trong <code>config.sh</code> đặt <code>SMS_FORWARD=1</code> để <b>mỗi SMS mới</b> tự gửi lên chat này <i>(OTP có thể lộ — cân nhắc)</i>
+/rndis_on /rndis_off — USB tether
+/hotspot_on /hotspot_off — Wi‑Fi hotspot
+/ttl như /ttl 65 — TTL khi đang tether
+/anydesk_fix — AnyDesk màn hình
 
-<b>🔌 USB / Wi‑Fi</b>
-• <code>/rndis_on</code> · <code>/rndis_off</code> — bật/tắt USB tether (RNDIS)
-• <code>/hotspot_on</code> · <code>/hotspot_off</code> — bật/tắt Wi‑Fi hotspot <i>(SSID/mật khẩu mặc định trong <code>usb_wifi.sh</code>)</i>
-• <code>/ttl</code> hoặc <code>/ttl_sync</code> — <b>chỉ lúc bạn gõ</b>: áp TTL/Hop Limit trên gói ra cổng nhà mạng (iptables <code>mangle</code>). Có thể gõ <code>/ttl 65</code>; không số thì dùng <code>TETHER_TTL_VALUE</code> trong config (nếu có) hoặc <code>net.ipv4.ip_default_ttl</code> (rồi fallback 65). <b>Không tự chạy</b> khi bật hotspot/RNDIS hay khi khởi động.
+/apn list · /apn auto · /apn viettel|vinaphone|mobifone|vietnamobile|gmobile — chỉ thêm preset, vào Cài đặt để chọn APN
 
-<b>🖥 AnyDesk</b>
-• <code>/anydesk_fix</code> — cấp <code>appops PROJECT_MEDIA allow</code> cho gói AnyDesk (chia sẻ màn hình ổn hơn)
-
-<b>📡 APN</b>
-• <code>/apn list</code> — bảng preset (tên nhà mạng → giá trị trường APN)
-• <code>/apn auto</code> — đoán nhà mạng từ SIM / tên vận hành
-• <code>/apn viettel</code> · <code>/apn vinaphone</code> · <code>/apn mobifone</code> · <code>/apn vietnamobile</code> · <code>/apn gmobile</code> — <b>ghi thêm một cấu hình APN preset vào máy</b> rồi đặt làm APN đang dùng (MCC/MNC theo SIM). Kiểm tra data di động; nếu lỗi thì xóa bản ghi vừa tạo và trả lại APN ưu tiên cũ.
-
-<b>⚠️ Nguồn</b>
-• <code>/shutdown</code> · <code>/restart</code> — tắt máy / khởi động lại
-
-<i>Nên tránh spam nhiều lệnh liên tiếp.</i>
+/shutdown · /restart
 EOF
 )"
+}
+
+_ping_find_bin() {
+  for x in ping /system/bin/ping /vendor/bin/ping; do
+    if command -v "$x" >/dev/null 2>&1; then command -v "$x"; return 0; fi
+    [ -x "$x" ] 2>/dev/null && { echo "$x"; return 0; }
+  done
+  return 1
+}
+
+_ping_parse_avg_ms() {
+  raw="$1"
+  line="$(echo "$raw" | grep 'min/avg/max' | head -n1)"
+  [ -z "$line" ] && line="$(echo "$raw" | grep 'avg/max' | head -n1)"
+  if [ -n "$line" ]; then
+    tmp="$(echo "$line" | sed 's/.*=//' | sed 's/ms//' | tr -d ' ')"
+    mid="$(echo "$tmp" | cut -d/ -f2)"
+    case "$mid" in *[!0-9.]*) mid="" ;; esac
+    [ -n "$mid" ] && { printf '%s' "$mid"; return 0; }
+  fi
+  echo "$raw" | grep -o 'time=[0-9.]*' | sed 's/^time=//' | awk '{ if ($1+0 > 0) { s+=($1+0); n++ } } END { if (n > 0) printf "%.0f", s/n }'
+}
+
+_ping_dns_avg_ms() {
+  h="$1"
+  pb="$(_ping_find_bin)" || { printf err; return 1; }
+  raw="$("$pb" -c 4 "$h" 2>&1)" || true
+  ms="$(_ping_parse_avg_ms "$raw")"
+  [ -z "$ms" ] && { printf err; return 1; }
+  printf '%s' "$ms"
+  return 0
 }
 
 get_uptime_short() {
@@ -54,7 +71,22 @@ get_uptime_short() {
 
 handle_ping() {
   up="$(get_uptime_short 2>/dev/null || echo "N/A")"
-  send_code "🏓 <b>Pong</b>\n⏱ Uptime: <code>${up}</code>"
+  hosts="${TG_PING_DNS:-8.8.8.8 1.1.1.1 223.5.5.5}"
+  msg="<b>Ping DNS</b>\nUptime $(escape_html "$up")\n\n"
+
+  for h in $hosts; do
+    [ -z "$h" ] && continue
+    avg="$(_ping_dns_avg_ms "$h")"
+    case "$avg" in err|'')
+      msg="${msg}$(escape_html "$h"): không phản hồi\n"
+      ;;
+    *)
+      msg="${msg}$(escape_html "$h"): ${avg} ms\n"
+      ;;
+    esac
+  done
+
+  send_code "$msg"
 }
 
 handle_status() {

@@ -52,6 +52,8 @@ fi
 
 send_code "🤖 <b>Telegram Device Bot</b>\nĐã khởi động · gõ <code>/help</code> để xem lệnh."
 
+(telegram_register_bot_commands >/dev/null 2>&1 &)
+
 (handle_monitor_changes >/dev/null 2>&1 &)
 (handle_low_battery_watch >/dev/null 2>&1 &)
 

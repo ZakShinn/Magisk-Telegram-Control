@@ -4,6 +4,62 @@
 
 SMS_LAST_ID_FILE="/data/local/tmp/tg_sms_last_id"
 SMS_DB="/data/data/com.android.providers.telephony/databases/mmssms.db"
+# Giống viewer PHP: query toàn bảng SMS provider (sms), không chỉ sms/inbox — một số ROM/Google Messages trả dữ liệu đầy đủ hơn ở đây.
+SMS_PROVIDER_URI="${SMS_PROVIDER_URI:-content://sms}"
+
+# Đường dẫn content có khi không nằm trong PATH của service shell; một số ROM cần --user 0.
+SMS_CQ=""
+_sms_content_bin() {
+  [ -n "$SMS_CQ" ] && { printf '%s' "$SMS_CQ"; return 0; }
+  for c in content /system/bin/content /apex/com.android.tethering/bin/content; do
+    if command -v "$c" >/dev/null 2>&1; then SMS_CQ="$(command -v "$c")"; printf '%s' "$SMS_CQ"; return 0; fi
+    if [ -x "$c" ] 2>/dev/null; then SMS_CQ="$c"; printf '%s' "$SMS_CQ"; return 0; fi
+  done
+  return 1
+}
+
+_sms_content_query() {
+  cq="$(_sms_content_bin)" || return 1
+  out="$("$cq" query "$@" 2>/dev/null)"
+  case "$out" in *[Uu]sage*|*[Ee]rror*|*"Couldn't find"*|*"not found"*|"")
+    out="$("$cq" query --user 0 "$@" 2>/dev/null)"
+    ;;
+  *)
+    printf '%s\n' "$out"
+    return 0
+    ;;
+  esac
+  printf '%s\n' "$out"
+}
+
+# Một cột một truy vấn — parse đúng kể cả body có dấu phẩy. Tham số 3 tuỳ chọn = URI (mặc định SMS_PROVIDER_URI).
+_sms_content_cell() {
+  sid="$1"
+  col="$2"
+  uri="$3"
+  case "$uri" in '') uri="$SMS_PROVIDER_URI" ;; esac
+  line="$(_sms_content_query --uri "$uri" --projection "$col" --where "_id=${sid}" 2>/dev/null | head -n1)"
+  [ -z "$line" ] && { printf ''; return 1; }
+  rest="$(printf '%s\n' "$line" | sed -e 's/^Row:[[:space:]]*[0-9]*[[:space:]]*//')"
+  case "$rest" in "${col}="*)
+    printf '%s' "${rest#"${col}="}"
+    ;;
+  *)
+    printf ''
+    ;;
+  esac
+  return 0
+}
+
+sms_content_recv_row_vals() {
+  sid="$1"
+  uri="$2"
+  case "$uri" in '') uri="$SMS_PROVIDER_URI" ;; esac
+  addr="$(_sms_content_cell "$sid" address "$uri")"
+  body="$(_sms_content_cell "$sid" body "$uri")"
+  dms="$(_sms_content_cell "$sid" date "$uri")"
+  printf '%s\t%s\t%s\n' "$addr" "$body" "$dms"
+}
 
 _sms_sqlite_module_bin() {
   sd="${SCRIPT_DIR:-}"
@@ -96,6 +152,51 @@ sms_forward_try_poll_once() {
   last="$(cat "$SMS_LAST_ID_FILE" 2>/dev/null || echo 0)"
   case "$last" in ''|*[!0-9]*) last=0 ;; esac
 
+  # Giống viewer PHP (content://sms). Nếu ROM không lọc type= trong WHERE, fallback sms/inbox.
+  if _sms_content_bin >/dev/null 2>&1; then
+    newlast="$last"
+    uri="$SMS_PROVIDER_URI"
+    idlist="$(
+      _sms_content_query --uri "$uri" \
+        --projection _id \
+        --where "type=1 AND _id>${last}" \
+        --sort "_id ASC" 2>/dev/null \
+        | grep -o '_id=[0-9]*' | cut -d= -f2
+    )"
+    if [ -z "$idlist" ]; then
+      uri="content://sms/inbox"
+      idlist="$(
+        _sms_content_query --uri "$uri" \
+          --projection _id \
+          --where "_id>${last}" \
+          --sort "_id ASC" 2>/dev/null \
+          | grep -o '_id=[0-9]*' | cut -d= -f2
+      )"
+    fi
+    n=0
+    for sid in $idlist; do
+      [ -z "$sid" ] && continue
+      case "$sid" in *[!0-9]*) continue ;; esac
+      n=$((n + 1))
+      [ "$n" -gt 25 ] && break
+      tp="$(_sms_content_cell "$sid" type "${uri}")"
+      case "$tp" in 1|'1'|"") ;;
+      *)
+        continue
+        ;;
+      esac
+      row="$(sms_content_recv_row_vals "$sid" "$uri")"
+      [ -z "$row" ] && continue
+      addr="$(printf '%s\n' "$row" | cut -f1)"
+      body="$(printf '%s\n' "$row" | cut -f2)"
+      dms="$(printf '%s\n' "$row" | cut -f3)"
+      sms_notify_one "$sid" "$addr" "$body" "$dms"
+      [ "$sid" -gt "$newlast" ] 2>/dev/null && newlast="$sid"
+    done
+    echo "$newlast" > "$SMS_LAST_ID_FILE"
+    return 0
+  fi
+
   sq="$(_sms_find_sqlite3)"
   if [ -n "$sq" ] && [ -r "$SMS_DB" ]; then
     ids="$(sms_sqlite_ids_after "$last")"
@@ -117,24 +218,7 @@ sms_forward_try_poll_once() {
     return 0
   fi
 
-  command -v content >/dev/null 2>&1 || return 1
-
-  lid="$(content query --uri content://sms/inbox --projection _id --sort "_id DESC" --limit 1 2>/dev/null \
-    | grep -o '_id=[0-9]*' | head -n1 | cut -d= -f2)"
-  [ -z "$lid" ] && return 1
-  case "$lid" in *[!0-9]*) return 1 ;; esac
-
-  [ "$lid" -gt "$last" ] 2>/dev/null || {
-    echo "$last" > "$SMS_LAST_ID_FILE"
-    return 0
-  }
-
-  raw="$(content query --uri content://sms/inbox --projection address:body:date:_id --where "_id=${lid}" --limit 1 2>/dev/null)"
-  addr="$(echo "$raw" | grep -o 'address=[^,]*' | head -n1 | sed 's/^address=//')"
-  body="$(echo "$raw" | grep -o 'body=[^,]*' | head -n1 | sed 's/^body=//')"
-  dms="$(echo "$raw" | grep -o 'date=[^,]*' | head -n1 | sed 's/^date=//')"
-  sms_notify_one "$lid" "$addr" "$body" "$dms"
-  echo "$lid" > "$SMS_LAST_ID_FILE"
+  return 1
 }
 
 sms_seed_last_id_if_needed() {
@@ -142,19 +226,36 @@ sms_seed_last_id_if_needed() {
   case "$cur" in ''|*[!0-9]*) cur=0 ;; esac
   [ "$cur" -ne 0 ] 2>/dev/null && return 0
 
+  if _sms_content_bin >/dev/null 2>&1; then
+    lid="$(
+      _sms_content_query --uri "$SMS_PROVIDER_URI" \
+        --projection _id \
+        --where "type=1" \
+        --sort "_id DESC" --limit 1 2>/dev/null \
+      | grep -o '_id=[0-9]*' | head -n1 | cut -d= -f2
+    )"
+    case "$lid" in ''|*[!0-9]*)
+      lid="$(
+        _sms_content_query --uri content://sms/inbox \
+          --projection _id \
+          --sort "_id DESC" --limit 1 2>/dev/null \
+        | grep -o '_id=[0-9]*' | head -n1 | cut -d= -f2
+      )"
+      ;;
+    esac
+    case "$lid" in ''|*[!0-9]*) lid=0 ;; esac
+    echo "$lid" > "$SMS_LAST_ID_FILE"
+    return 0
+  fi
+
   sq="$(_sms_find_sqlite3)"
   if [ -n "$sq" ] && [ -r "$SMS_DB" ]; then
     max="$("$sq" "$SMS_DB" "SELECT COALESCE(MAX(_id),0) FROM sms WHERE type=1;" 2>/dev/null)"
     case "$max" in ''|*[!0-9]*) max=0 ;; esac
     echo "$max" > "$SMS_LAST_ID_FILE"
-    return 0
   fi
 
-  command -v content >/dev/null 2>&1 || return 0
-  lid="$(content query --uri content://sms/inbox --projection _id --sort "_id DESC" --limit 1 2>/dev/null \
-    | grep -o '_id=[0-9]*' | head -n1 | cut -d= -f2)"
-  case "$lid" in ''|*[!0-9]*) lid=0 ;; esac
-  echo "$lid" > "$SMS_LAST_ID_FILE"
+  return 0
 }
 
 handle_sms_forward_loop() {
@@ -168,22 +269,58 @@ handle_sms_forward_loop() {
   done
 }
 
+_sms_inbox_html_via_content() {
+  uri="$SMS_PROVIDER_URI"
+  ids="$(
+    _sms_content_query --uri "$uri" \
+      --projection _id \
+      --where "type=1" \
+      --sort "_id DESC" 2>/dev/null \
+      | grep -o '_id=[0-9]*' | cut -d= -f2 | head -n7
+  )"
+  if [ -z "$ids" ]; then
+    uri="content://sms/inbox"
+    ids="$(
+      _sms_content_query --uri "$uri" \
+        --projection _id \
+        --sort "_id DESC" 2>/dev/null \
+        | grep -o '_id=[0-9]*' | cut -d= -f2 | head -n7
+    )"
+  fi
+  [ -z "$ids" ] && { printf ''; return 0; }
+  msg_out="<b>📩 SMS đến gần đây</b>\n<code>────────────────────────</code>\n\n"
+  for sid in $ids; do
+    [ -z "$sid" ] && continue
+    tp="$(_sms_content_cell "$sid" type "$uri")"
+    case "$tp" in 1|'1'|"") ;;
+    *) continue ;; esac
+    row="$(sms_content_recv_row_vals "$sid" "$uri")"
+    [ -z "$row" ] && continue
+    addr="$(printf '%s\n' "$row" | cut -f1)"
+    snippet="$(printf '%s\n' "$row" | cut -f2)"
+    dms="$(printf '%s\n' "$row" | cut -f3)"
+    snippet="$(echo "$snippet" | awk '{ print substr($0,1,160) }')"
+    when="$(sms_human_date_ms "$dms")"
+    msg_out="${msg_out}• <code>#$(escape_html "$sid")</code> <b>$(escape_html "$addr")</b>\n └ <i>${when}</i>\n └ $(escape_html "$snippet")\n\n"
+  done
+  printf '%s' "$msg_out"
+}
+
 handle_sms_inbox() {
   sq="$(_sms_find_sqlite3)"
-  if [ -z "$sq" ] || [ ! -r "$SMS_DB" ]; then
-    send_code "$(cat <<'EOF'
-📩 <b>SMS</b>
-Không đọc được kho SMS.
 
-<i>Cần đọc được</i> <code>mmssms.db</code> <i>khi chạy root (tuỳ SELinux/ROM). SQLite nhúng:</i> <code>bin/sqlite3.*</code>
-EOF
-)"
-    return 1
+  if _sms_content_bin >/dev/null 2>&1; then
+    cmsg="$(_sms_inbox_html_via_content)"
+    if [ -n "$cmsg" ]; then
+      send_code "$cmsg"
+      return 0
+    fi
   fi
 
-  flat="$(_sms_flat_body_sql_expr)"
-  tab="$(printf '\t')"
-  data="$("$sq" -separator "$tab" "$SMS_DB" "
+  if [ -n "$sq" ] && [ -r "$SMS_DB" ]; then
+    flat="$(_sms_flat_body_sql_expr)"
+    tab="$(printf '\t')"
+    data="$("$sq" -separator "$tab" "$SMS_DB" "
 SELECT _id,
        COALESCE(address,'?'),
        substr(${flat},1,160),
@@ -191,21 +328,34 @@ SELECT _id,
 FROM sms WHERE type=1
 ORDER BY _id DESC LIMIT 7;" 2>/dev/null)"
 
-  if [ -z "$data" ]; then
-    send_code "📩 <b>Hộp thư đến</b>\n<i>Trống hoặc không truy vấn được.</i>"
+    if [ -n "$data" ]; then
+      msg="<b>📩 SMS gần đây</b>\n<code>────────────────────────</code>\n\n"
+      OLDIFS="$IFS"
+      while IFS="$(printf '\t')" read -r sid addr snippet dms || [ -n "$sid" ]; do
+        [ -z "$sid" ] && continue
+        when="$(sms_human_date_ms "$dms")"
+        msg="${msg}• <code>#$(escape_html "$sid")</code> <b>$(escape_html "$addr")</b>\n └ <i>${when}</i>\n └ $(escape_html "$snippet")\n\n"
+      done <<SMS_EOF
+$data
+SMS_EOF
+      IFS="$OLDIFS"
+
+      send_code "$msg"
+      return 0
+    fi
+  fi
+
+  if _sms_content_bin >/dev/null 2>&1; then
+    send_code "📩 <b>Hộp thư đến</b>\n<i>Trống hoặc không truy vấn được</i> (content://sms + user 0)."
     return 0
   fi
 
-  msg="<b>📩 SMS gần đây</b>\n<code>────────────────────────</code>\n\n"
-  OLDIFS="$IFS"
-  while IFS="$(printf '\t')" read -r sid addr snippet dms || [ -n "$sid" ]; do
-    [ -z "$sid" ] && continue
-    when="$(sms_human_date_ms "$dms")"
-    msg="${msg}• <code>#$(escape_html "$sid")</code> <b>$(escape_html "$addr")</b>\n └ <i>${when}</i>\n └ $(escape_html "$snippet")\n\n"
-  done <<SMS_EOF
-$data
-SMS_EOF
-  IFS="$OLDIFS"
+  send_code "$(cat <<'EOF'
+📩 <b>SMS</b>
+Không đọc được kho SMS (thiếu lệnh <code>content</code> và không đọc được <code>mmssms.db</code>).
 
-  send_code "$msg"
+Cần root + <code>content query --uri content://sms</code> hoặc quyền đọc provider Telephony.
+EOF
+)"
+  return 1
 }

@@ -53,12 +53,11 @@ is_nr_connected() {
   reg="$(dumpsys telephony.registry 2>/dev/null || true)"
   all="$out
 $reg"
-  echo "$all" | grep -qiE 'nrState[:= ]+CONNECTED' && return 0
-  echo "$all" | grep -qiE 'isNrConnected[:= ]+true' && return 0
-  echo "$all" | grep -qiE 'mNrState[:= ]+CONNECTED' && return 0
-  echo "$all" | tr '\n' ' ' | grep -qiE 'PhysicalChannelConfig.*(RAT|networkType)[:= ]*NR' && return 0
-  echo "$all" | grep -qiE 'mDataNetworkType=20' && return 0
-  getprop gsm.network.type 2>/dev/null | grep -qi 'NR' && return 0
+  echo "$all" | grep -qiE 'nrState[=: ]+CONNECTED|CellIdentityNr|CellInfoNr|PUBLIC_NR|TYPE_NR|DATA_NETWORK_TYPE_NR|NETWORK_TYPE_NR|EN-DC|ENDC|RAT_NR|NrArfcn|SsRsrp' && return 0
+  echo "$all" | grep -qiE 'isNrConnected[=: ]+true|mNrState[=: ]+CONNECTED|PhysicalChannelConfig[^
+]*[=: ]NR|bandwidth.*NR|Mmwave' && return 0
+  echo "$all" | grep -qiE 'mDataNetworkType=20|mVoiceNetworkType=20|TransportBlock.*NR' && return 0
+  getprop gsm.network.type 2>/dev/null | grep -qiE 'NR|5G' && return 0
   return 1
 }
 
@@ -75,26 +74,46 @@ rat_num_to_name() {
 get_nettype() {
   NETTYPE_RAW="$(getprop_safe gsm.network.type)"
   REG="$(dumpsys telephony.registry 2>/dev/null || true)"
+  TEL="$(dumpsys telephony 2>/dev/null || true)"
+  COMBINED="$REG
+$TEL"
   DATA_NUM="$(echo "$REG" | grep -oE 'mDataNetworkType=[0-9]+' | head -n1 | cut -d= -f2)"
 
+  # gsm.network.type có NR / 5G / LTE,NR … thường đúng hơn mDataNetworkType=13 khi NSA.
+  case "$(echo "$NETTYPE_RAW" | tr '[:lower:]' '[:upper:]')" in *NR*|*5G*)
+    echo "5G"
+    return
+    ;;
+  esac
+
+  if [ "$DATA_NUM" = "20" ]; then
+    echo "5G"
+    return
+  fi
+
   if is_nr_connected; then
-    if [ "$DATA_NUM" = "20" ] || echo "$NETTYPE_RAW" | grep -qi 'NR'; then
-      echo "5G (SA)"
-    else
-      echo "LTE+NR (NSA)"
-    fi
+    echo "5G"
     return
   fi
 
   if echo "$DATA_NUM" | grep -qE '^[0-9]+$'; then
     rat="$(rat_num_to_name "$DATA_NUM")"
-    [ "$rat" != "Không xác định" ] && { echo "$rat"; return; }
+    if [ "$rat" = "LTE" ]; then
+      if echo "$COMBINED" | grep -qiE 'CellIdentityNr|CellInfoNr|PUBLIC_NR|TYPE_NR|EN-DC|ENDC|NETWORK_TYPE_NR|PHY.*[=: ]NR|RAT_NR|SsRsrp'; then
+        echo "5G"
+        return
+      fi
+    fi
+    if [ "$rat" != "Không xác định" ]; then
+      echo "$rat"
+      return
+    fi
   fi
 
   if [ -n "$NETTYPE_RAW" ]; then
     up="$(echo "$NETTYPE_RAW" | tr '[:lower:]' '[:upper:]')"
     case "$up" in
-      *NR*)  echo "5G";;
+      *NR*|*5G*) echo "5G";;
       *LTE*) echo "LTE";;
       *HSPA*|*UMTS*|*3G*) echo "3G";;
       *EDGE*|*GPRS*|*2G*) echo "2G";;
@@ -108,9 +127,9 @@ get_nettype() {
 get_nettype_with_desc() {
   base="$(get_nettype)"
   case "$base" in
+    "5G") echo "5G (SA hoặc NSA — theo báo ROM/SIM)" ;;
     "5G (SA)") echo "5G (SA) – 5G độc lập (Standalone)" ;;
     "LTE+NR (NSA)") echo "LTE+NR (NSA) – 4G LTE + 5G (Non-Standalone)" ;;
-    "5G") echo "5G – mạng 5G (kiểu kết nối không rõ)" ;;
     "LTE") echo "LTE – 4G LTE" ;;
     "3G") echo "3G – UMTS/HSPA (3G)" ;;
     "2G") echo "2G – GSM/EDGE (2G)" ;;
