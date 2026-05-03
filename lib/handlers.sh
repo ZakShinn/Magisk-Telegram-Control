@@ -7,15 +7,22 @@ handle_help() {
 
 /help                 - Hiển thị danh sách lệnh
 /status             - Hiển thị thông tin cơ bản của thiết bị
-/signal              - Sóng: loại mạng, băng tần, tín hiệu
-/ip                      - Hiển thị toàn bộ IP + Public IP
+/signal              - Báo cáo mạng: RAT, băng tần, RSRP/RSRQ/SINR, roaming
+/ip                      - IPv4 / IPv6 cục bộ + WAN public
+/ping [đích]     - Ping (mặc định 1.1.1.1) · vd: <code>/ping 8.8.8.8</code>
 /battery           - Thông tin pin hiện tại
 /datausage     - Dung lượng data đã dùng
 
+/loop_on &lt;phút&gt; &lt;lệnh&gt;  - Hẹn giờ: sau N phút chạy lệnh một lần
+/loop_off       - Hủy mọi hẹn giờ đang chờ (sleep nền)
+
 /rndis_on        - Bật RNDIS (USB tether)
 /rndis_off        - Tắt RNDIS (USB tether)
-/hotspot_on  - Bật Hotspot (Phát wifi)
+/hotspot_on [SSID MậtKhẩu]  - Bật hotspot (mặc định từ config hoặc Hotspot/12345678)
 /hotspot_off  - Tắt Hotspot (Phát wifi)
+
+/ttl_on       - Chạy script TTL/NFQUEUE (nfqttl + iptables; ~30s chờ + vòng nfqttl)
+/ttl_off      - Không thay đổi gì (giữ chỗ lệnh)
 
 /shutdown     - Tắt máy
 /restart            - Khởi động lại
@@ -27,7 +34,6 @@ EOF
 
 handle_status() {
   (handle_status_send >/dev/null 2>&1 &)
-  send_code "✅ Đang thu thập thông tin"
 }
 
 handle_status_on_boot() {
@@ -36,62 +42,238 @@ handle_status_on_boot() {
 }
 
 handle_signal() {
+  dump="$(dumpsys telephony 2>/dev/null; dumpsys telephony.registry 2>/dev/null)"
   dbm="$(get_dbm)"
+  bandinfo="$(get_band_info_from_dump "$dump")"
   nettypedesc="$(get_nettype_with_desc)"
-  bandinfo="$(get_band_info)"
   quality="$(map_sig_quality "$dbm")"
   operator="$(get_operator_name)"
+  bars="$(get_signal_bars "$dbm")"
+  rsrq="$(get_rsrq_db_from_dump "$dump")"
+  sinr="$(get_sinr_db_from_dump "$dump")"
+  roaming="$(get_roaming_status_vi_from_dump "$dump")"
+  meter="$(format_dbm_strength_meter "$dbm")"
+  rat_raw="$(get_voice_data_rat_lines_from_dump "$dump")"
 
-  msg="📶 Thông tin sóng:\n\n"
-  msg="${msg}• Nhà mạng  : ${operator}\n"
-  msg="${msg}• Network   : ${nettypedesc}\n"
+  op_esc="$(escape_html "$operator")"
+  net_esc="$(escape_html "$nettypedesc")"
+  qual_esc="$(escape_html "$quality")"
+  bars_esc="$(escape_html "$bars")"
+  dbm_esc="$(escape_html "$dbm")"
+  rsrq_esc="$(escape_html "$rsrq")"
+  sinr_esc="$(escape_html "$sinr")"
+  roam_esc="$(escape_html "$roaming")"
+  meter_esc="$(escape_html "$meter")"
+  ts="$(date '+%H:%M:%S · %d/%m/%Y' 2>/dev/null || echo '—')"
+  ts_esc="$(escape_html "$ts")"
+
   if [ -n "$bandinfo" ]; then
-    msg="${msg}• Band      : ${bandinfo}\n"
+    band_block="<code>$(escape_html "$bandinfo")</code>"
+  else
+    band_block="<i>Không đọc được băng tần từ modem (ROM/NSA hoặc chưa camp đủ)</i>"
   fi
-  msg="${msg}• Tín hiệu  : ${dbm} dBm\n"
-  msg="${msg}• Chất lượng: ${quality}"
+
+  rat_block=""
+  if [ -n "$rat_raw" ]; then
+    rat_fmt="$(echo "$rat_raw" | while IFS= read -r L || [ -n "$L" ]; do
+      [ -z "$L" ] && continue
+      printf '%s\n' "• $(escape_html "$L")"
+    done)"
+    rat_block="<b>VoLTE · RAT dữ liệu</b>
+${rat_fmt}
+
+"
+  fi
+
+  meter_block=""
+  if [ -n "$meter" ]; then
+    meter_block="<b>Thanh mức (ước lượng)</b>
+<code>${meter_esc}</code>
+
+"
+  fi
+
+  extra_physics=""
+  if [ -n "$rsrq" ]; then
+    extra_physics="${extra_physics}<b>RSRQ</b> (chất lượng kênh): <code>${rsrq_esc} dB</code>
+"
+  fi
+  if [ -n "$sinr" ]; then
+    extra_physics="${extra_physics}<b>SINR / RSSNR</b> (tỷ số nhiễu): <code>${sinr_esc} dB</code>
+"
+  fi
+
+  msg="<b>📡 Báo cáo mạng di động</b>
+<i>${ts_esc}</i>
+━━━━━━━━━━━━━━━━
+
+<b>Nhà mạng</b>
+<code>${op_esc}</code>
+
+${rat_block}<b>Công nghệ truy cập</b>
+${net_esc}
+
+<b>Băng tần</b>
+${band_block}
+
+<b>Tín hiệu · RSRP</b>
+<code>${dbm_esc} dBm</code>
+<b>Đánh giá</b>: ${qual_esc} · ${bars_esc}
+
+${meter_block}${extra_physics}<b>Chuyển vùng</b>
+${roam_esc}
+
+<i>Tham khảo: modem, antenna và ROM quyết định độ chính xác; NSA có thể hiển thị LTE + NR.</i>"
 
   send_code "$msg"
 }
 
 handle_ip() {
+  ts="$(date '+%H:%M:%S · %d/%m/%Y' 2>/dev/null || echo '—')"
+  ts_esc="$(escape_html "$ts")"
+  pub="$(get_public_ip)"
+  pub_esc="$(escape_html "$pub")"
+
   if command -v ip >/dev/null 2>&1; then
     ipv4="$(
       ip -o -4 addr show 2>/dev/null \
-        | awk '!/127\.0\.0\.1/ {print "- " $2 ": " $4}'
+        | awk '!/127\.0\.0\.1/ {print $2 "|" $4}'
     )"
-
     ipv6="$(
       ip -o -6 addr show 2>/dev/null \
-        | awk '!/ ::1\/128/ && !/ scope host / {print "- " $2 ": " $4}'
+        | awk '!/ ::1\/128/ && !/ scope host / {print $2 "|" $4}'
     )"
 
-    if [ -z "$ipv4$ipv6" ]; then
-      local_ips="(Không lấy được IP nội bộ)"
+    if [ -z "$ipv4" ] && [ -z "$ipv6" ]; then
+      local_block="<i>Không có địa chỉ trên giao diện (ngoài loopback) hoặc <code>ip addr</code> không trả dữ liệu.</i>"
     else
-      local_ips="IP nội bộ:"
-      [ -n "$ipv4" ] && local_ips="$local_ips\n[IPv4]\n$ipv4"
-      [ -n "$ipv6" ] && local_ips="$local_ips\n[IPv6]\n$ipv6"
+      v4_lines=""
+      if [ -n "$ipv4" ]; then
+        v4_lines="$(echo "$ipv4" | while IFS= read -r row || [ -n "$row" ]; do
+          [ -z "$row" ] && continue
+          iface="${row%%|*}"
+          cidr="${row#*|}"
+          printf '%s\n' "• <b>$(escape_html "$iface")</b> <code>$(escape_html "$cidr")</code>"
+        done)"
+      fi
+      v6_lines=""
+      if [ -n "$ipv6" ]; then
+        v6_lines="$(echo "$ipv6" | while IFS= read -r row || [ -n "$row" ]; do
+          [ -z "$row" ] && continue
+          iface="${row%%|*}"
+          cidr="${row#*|}"
+          printf '%s\n' "• <b>$(escape_html "$iface")</b> <code>$(escape_html "$cidr")</code>"
+        done)"
+      fi
+
+      if [ -n "$v4_lines" ]; then
+        v4_sec="<b>IPv4</b> <i>(LAN / nội bộ)</i>
+${v4_lines}"
+      else
+        v4_sec="<b>IPv4</b> <i>(LAN / nội bộ)</i>
+<i>—</i>"
+      fi
+      if [ -n "$v6_lines" ]; then
+        v6_sec="<b>IPv6</b>
+${v6_lines}"
+      else
+        v6_sec="<b>IPv6</b>
+<i>—</i>"
+      fi
+      local_block="${v4_sec}
+
+${v6_sec}"
     fi
   else
     out="$(ifconfig 2>/dev/null)"
-    [ -z "$out" ] && out="Không lấy được IP nội bộ"
-    local_ips="$out"
+    if [ -z "$out" ]; then
+      local_block="<i>Không đọc được giao diện (không có <code>ip</code> và <code>ifconfig</code> trống).</i>"
+    else
+      out_esc="$(escape_html "$out")"
+      local_block="<b>Nội dung ifconfig</b> <i>(dự phòng)</i>
+<pre>${out_esc}</pre>"
+    fi
   fi
 
-  pub="$(get_public_ip)"
   if [ -n "$pub" ]; then
-    out="${local_ips}\n\nPublic IP: ${pub}"
+    wan_block="<code>${pub_esc}</code>"
   else
-    out="${local_ips}\n\nPublic IP: (không lấy được)"
+    wan_block="<i>Không tra được WAN công khai (HTTP/DNS bị chặn hoặc dịch vụ tra cứu lỗi).</i>"
   fi
 
-  send_code "$out"
+  msg="<b>🌐 Địa chỉ IP</b>
+<i>${ts_esc}</i>
+━━━━━━━━━━━━━━━━
+
+<b>Cục bộ</b>
+${local_block}
+
+<b>WAN · Public</b>
+${wan_block}
+
+<i>Public qua HTTP (ipify / ifconfig.me / ipinfo). Bản ghi IPv6 global có thể trùng hoặc khác địa chỉ WAN tùy nhà mạng.</i>"
+
+  send_code "$msg"
 }
 
 handle_battery() {
   info="$(get_batt_info_text)"
   send_code "$info"
+}
+
+handle_ttl_on() {
+  send_code "⏳ /ttl_on: DROP FORWARD 30s → nfqttl → NFQUEUE (6464). Có thể mất vài phút, đừng spam..."
+  if ttl_on_run_script; then
+    send_code "✅ /ttl_on hoàn tất (nfqttl + iptables theo script)."
+  else
+    send_code "❌ /ttl_on thất bại. Kiểm tra TETHER_NFQTTL_DIR (thư mục chứa nfqttl), root, iptables."
+  fi
+}
+
+handle_ttl_off() {
+  send_code "ℹ️ /ttl_off: không thực hiện thay đổi (theo cấu hình của bạn)."
+}
+
+# Chỉ cho phép ký tự an toàn cho đích ping (tránh chèn lệnh).
+_ping_target_valid() {
+  t="$1"
+  [ -z "$t" ] && return 1
+  [ "${#t}" -gt 253 ] && return 1
+  case "$t" in
+    *[!-0-9A-Za-z.:]*) return 1 ;;
+  esac
+  return 0
+}
+
+handle_ping() {
+  rest="$1"
+  rest="$(echo "$rest" | sed 's/^[[:space:]]*//')"
+  if [ -n "$rest" ]; then
+    target="${rest%% *}"
+  else
+    target="1.1.1.1"
+  fi
+
+  if ! _ping_target_valid "$target"; then
+    send_code "❌ Đích ping không hợp lệ. Chỉ dùng IPv4/IPv6 hoặc tên host (chữ, số, <code>.</code> <code>:</code> <code>-</code>)."
+    return 1
+  fi
+  if ! command -v ping >/dev/null 2>&1; then
+    send_code "❌ Không tìm thấy lệnh <code>ping</code> trên thiết bị."
+    return 1
+  fi
+
+  out="$(ping -c 4 -W 5 "$target" 2>&1)" || true
+  out="$(printf '%s' "$out" | head -c 3500)"
+  out_esc="$(printf '%s' "$out" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')"
+
+  send_code "<b>ping</b> → <code>$(escape_html "$target")</code>
+<pre>${out_esc}</pre>"
+}
+
+# Xác nhận Telegram đã tới bot (trước khi xử lý lệnh).
+notify_command_received() {
+  send_code "✅ Đã nhận lệnh:\n<code>$(escape_html "$1")</code>\nĐang thực hiện…"
 }
 
 dispatch_command() {
@@ -103,22 +285,91 @@ dispatch_command() {
   fi
 
   case "$TEXT" in
-    "/help")        handle_help ;;
-    "/start")       handle_help ;;
-    "/shutdown")    handle_shutdown ;;
-    "/restart")     handle_restart ;;
-    "/status")      handle_status ;;
-    "/signal")      handle_signal ;;
-    "/ip")          handle_ip ;;
-    "/battery")     handle_battery ;;
-    "/datausage")   handle_datausage ;;
-    "/rndis_on")    handle_rndis_on ;;
-    "/rndis_off")   handle_rndis_off ;;
-    "/hotspot_on")  handle_hotspot_on ;;
-    "/hotspot_off") handle_hotspot_off ;;
+    "/help")
+      notify_command_received "$TEXT"
+      handle_help
+      ;;
+    "/start")
+      notify_command_received "$TEXT"
+      handle_help
+      ;;
+    "/shutdown")
+      notify_command_received "$TEXT"
+      handle_shutdown
+      ;;
+    "/restart")
+      notify_command_received "$TEXT"
+      handle_restart
+      ;;
+    "/status")
+      notify_command_received "$TEXT"
+      handle_status
+      ;;
+    "/signal")
+      notify_command_received "$TEXT"
+      handle_signal
+      ;;
+    "/ip")
+      notify_command_received "$TEXT"
+      handle_ip
+      ;;
+    /ping*)
+      notify_command_received "$TEXT"
+      rest="${TEXT#/ping}"
+      rest="$(echo "$rest" | sed 's/^[[:space:]]*//')"
+      handle_ping "$rest"
+      ;;
+    "/battery")
+      notify_command_received "$TEXT"
+      handle_battery
+      ;;
+    "/datausage")
+      notify_command_received "$TEXT"
+      handle_datausage
+      ;;
+    "/rndis_on")
+      notify_command_received "$TEXT"
+      handle_rndis_on
+      ;;
+    "/rndis_off")
+      notify_command_received "$TEXT"
+      handle_rndis_off
+      ;;
+    "/hotspot_on")
+      notify_command_received "$TEXT"
+      handle_hotspot_on ""
+      ;;
+    /hotspot_on*)
+      notify_command_received "$TEXT"
+      rest="${TEXT#/hotspot_on}"
+      rest="$(echo "$rest" | sed 's/^[[:space:]]*//')"
+      handle_hotspot_on "$rest"
+      ;;
+    "/hotspot_off")
+      notify_command_received "$TEXT"
+      handle_hotspot_off
+      ;;
+    "/ttl_on")
+      notify_command_received "$TEXT"
+      handle_ttl_on
+      ;;
+    "/ttl_off")
+      notify_command_received "$TEXT"
+      handle_ttl_off
+      ;;
+    "/loop_off")
+      notify_command_received "$TEXT"
+      handle_loop_off
+      ;;
+    /loop_on*)
+      notify_command_received "$TEXT"
+      rest="${TEXT#/loop_on}"
+      rest="$(echo "$rest" | sed 's/^[[:space:]]*//')"
+      handle_loop_on "$rest" "$CID"
+      ;;
     ""|*[![:print:]]*) ;;
     *)
-      send_code "❌ Lệnh không hợp lệ: ${TEXT}\nGõ /help để xem danh sách lệnh."
+      send_code "✅ Đã nhận:\n<code>$(escape_html "$TEXT")</code>\n❌ Lệnh không hợp lệ. Gõ /help để xem danh sách lệnh."
       ;;
   esac
 }

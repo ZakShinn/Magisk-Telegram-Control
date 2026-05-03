@@ -19,31 +19,34 @@ collect_iface_totals() {
           sub(/^[ \t]+/, "", line)
           split(line, parts, ":")
           iface=parts[1]
+          sub(/@.*/, "", iface)
           split(parts[2], a)
           rx = (a[1] + 0)
           tx = (a[9] + 0)
-
-          if(iface=="wlan0"){ w_rx+=rx; w_tx+=tx; next }
-          if(iface ~ /^rmnet/ || iface ~ /^ccmni/ || iface ~ /^rmnet_data/){ m_rx+=rx; m_tx+=tx; next }
-
-          if(iface ~ /^rndis/){
-            r_rx+=rx; r_tx+=tx
-            if(dbg==1) printf("DEBUG_RNDIS %s %d %d\n", iface, rx, tx) > "/dev/stderr"
-            next
-          }
 
           if(iface=="p2p0" || iface=="wlan1" || iface=="ap0" || iface=="br0" || iface=="usb0" || iface ~ /rmnet_usb/ || iface ~ /^usb/){
             h_rx+=rx; h_tx+=tx
             if(dbg==1) printf("DEBUG_HOTSPOT %s %d %d\n", iface, rx, tx) > "/dev/stderr"
             next
           }
+          if(iface ~ /^rndis/){
+            r_rx+=rx; r_tx+=tx
+            if(dbg==1) printf("DEBUG_RNDIS %s %d %d\n", iface, rx, tx) > "/dev/stderr"
+            next
+          }
+          if(iface ~ /^rmnet/ || iface ~ /^ccmni/ || iface ~ /^rmnet_data/){ m_rx+=rx; m_tx+=tx; next }
+          if(iface ~ /^bond/){ b_rx+=rx; b_tx+=tx; next }
+          if(iface ~ /^eth/){ e_rx+=rx; e_tx+=tx; next }
+          if(iface ~ /^wlan[0-9]+$/){ w_rx+=rx; w_tx+=tx; next }
         }
         END{
           if(w_rx=="") w_rx=0; if(w_tx=="") w_tx=0;
           if(m_rx=="") m_rx=0; if(m_tx=="") m_tx=0;
           if(r_rx=="") r_rx=0; if(r_tx=="") r_tx=0;
           if(h_rx=="") h_rx=0; if(h_tx=="") h_tx=0;
-          printf "%d %d %d %d %d %d %d %d\n", w_rx, w_tx, m_rx, m_tx, r_rx, r_tx, h_rx, h_tx
+          if(e_rx=="") e_rx=0; if(e_tx=="") e_tx=0;
+          if(b_rx=="") b_rx=0; if(b_tx=="") b_tx=0;
+          printf "%d %d %d %d %d %d %d %d %d %d %d %d\n", w_rx, w_tx, m_rx, m_tx, r_rx, r_tx, h_rx, h_tx, e_rx, e_tx, b_rx, b_tx
         }
       ' /proc/net/dev
     else
@@ -57,25 +60,56 @@ collect_iface_totals() {
     /mIfaceStatsMap:/{in=1; next}
     /mStatsMapB:/{in=0}
     in && NF>=6 {
-      iface=$2; rx=$3; tx=$5
-      if(iface=="wlan0"){w_rx+=rx; w_tx+=tx; next}
-      else if(iface ~ /^rmnet/ || iface ~ /^ccmni/ || iface ~ /^rmnet_data/){m_rx+=rx; m_tx+=tx; next}
+      iface=$2; sub(/@.*/, "", iface); rx=$3; tx=$5
+      if(iface=="p2p0" || iface=="wlan1" || iface=="ap0" || iface=="br0" || iface=="usb0" || iface ~ /rmnet_usb/ || iface ~ /^usb/){h_rx+=rx; h_tx+=tx; if(dbg==1) printf("DEBUG_HOTSPOT %s %d %d\n", iface, rx, tx) > "/dev/stderr"; next}
       else if(iface ~ /^rndis/){r_rx+=rx; r_tx+=tx; if(dbg==1) printf("DEBUG_RNDIS %s %d %d\n", iface, rx, tx) > "/dev/stderr"; next}
-      else if(iface=="p2p0" || iface=="wlan1" || iface=="ap0" || iface=="br0" || iface=="usb0" || iface ~ /rmnet_usb/ || iface ~ /^usb/){h_rx+=rx; h_tx+=tx; if(dbg==1) printf("DEBUG_HOTSPOT %s %d %d\n", iface, rx, tx) > "/dev/stderr"; next}
+      else if(iface ~ /^rmnet/ || iface ~ /^ccmni/ || iface ~ /^rmnet_data/){m_rx+=rx; m_tx+=tx; next}
+      else if(iface ~ /^bond/){b_rx+=rx; b_tx+=tx; next}
+      else if(iface ~ /^eth/){e_rx+=rx; e_tx+=tx; next}
+      else if(iface ~ /^wlan[0-9]+$/){w_rx+=rx; w_tx+=tx; next}
     }
     END{
       if(w_rx=="") w_rx=0; if(w_tx=="") w_tx=0;
       if(m_rx=="") m_rx=0; if(m_tx=="") m_tx=0;
       if(r_rx=="") r_rx=0; if(r_tx=="") r_tx=0;
       if(h_rx=="") h_rx=0; if(h_tx=="") h_tx=0;
-      printf "%d %d %d %d %d %d %d %d\n", w_rx, w_tx, m_rx, m_tx, r_rx, r_tx, h_rx, h_tx
+      if(e_rx=="") e_rx=0; if(e_tx=="") e_tx=0;
+      if(b_rx=="") b_rx=0; if(b_tx=="") b_tx=0;
+      printf "%d %d %d %d %d %d %d %d %d %d %d %d\n", w_rx, w_tx, m_rx, m_tx, r_rx, r_tx, h_rx, h_tx, e_rx, e_tx, b_rx, b_tx
     }
   '
 }
 
 _totals_fallback_sysfs() {
-  W_RX=$(cat /sys/class/net/wlan0/statistics/rx_bytes 2>/dev/null || echo 0)
-  W_TX=$(cat /sys/class/net/wlan0/statistics/tx_bytes 2>/dev/null || echo 0)
+  W_RX=0; W_TX=0
+  for _wf in /sys/class/net/wlan*; do
+    [ -e "$_wf" ] || continue
+    _bn="${_wf##*/}"
+    case "$_bn" in wlan1) continue ;; esac
+    echo "$_bn" | grep -qE '^wlan[0-9]+$' || continue
+    if [ -r "$_wf/statistics/rx_bytes" ]; then
+      W_RX=$((W_RX + $(cat "$_wf/statistics/rx_bytes")))
+      W_TX=$((W_TX + $(cat "$_wf/statistics/tx_bytes")))
+    fi
+  done
+
+  E_RX=0; E_TX=0
+  for _ef in /sys/class/net/eth[0-9]*; do
+    [ -e "$_ef" ] || continue
+    if [ -r "$_ef/statistics/rx_bytes" ]; then
+      E_RX=$((E_RX + $(cat "$_ef/statistics/rx_bytes")))
+      E_TX=$((E_TX + $(cat "$_ef/statistics/tx_bytes")))
+    fi
+  done
+
+  B_RX=0; B_TX=0
+  for _bf in /sys/class/net/bond[0-9]*; do
+    [ -e "$_bf" ] || continue
+    if [ -r "$_bf/statistics/rx_bytes" ]; then
+      B_RX=$((B_RX + $(cat "$_bf/statistics/rx_bytes")))
+      B_TX=$((B_TX + $(cat "$_bf/statistics/tx_bytes")))
+    fi
+  done
 
   M_RX=0; M_TX=0
   for ifn in rmnet0 rmnet_data0 ccmni0; do
@@ -101,7 +135,9 @@ _totals_fallback_sysfs() {
     fi
   done
 
-  printf "%s %s %s %s %s %s %s %s\n" "$W_RX" "$W_TX" "$M_RX" "$M_TX" "$R_RX" "$R_TX" "$HS_RX" "$HS_TX"
+  printf "%s %s %s %s %s %s %s %s %s %s %s %s\n" \
+    "$W_RX" "$W_TX" "$M_RX" "$M_TX" "$R_RX" "$R_TX" "$HS_RX" "$HS_TX" \
+    "$E_RX" "$E_TX" "$B_RX" "$B_TX"
 }
 
 _resolve_totals_vars() {
@@ -116,11 +152,15 @@ _resolve_totals_vars() {
   M_RX=${3:-0}; M_TX=${4:-0}
   R_RX=${5:-0}; R_TX=${6:-0}
   HS_RX=${7:-0}; HS_TX=${8:-0}
+  E_RX=${9:-0}; E_TX=${10:-0}
+  B_RX=${11:-0}; B_TX=${12:-0}
 
   W_RX=${W_RX:-0}; W_TX=${W_TX:-0}
   M_RX=${M_RX:-0}; M_TX=${M_TX:-0}
   R_RX=${R_RX:-0}; R_TX=${R_TX:-0}
   HS_RX=${HS_RX:-0}; HS_TX=${HS_TX:-0}
+  E_RX=${E_RX:-0}; E_TX=${E_TX:-0}
+  B_RX=${B_RX:-0}; B_TX=${B_TX:-0}
 }
 
 _build_usage_summary_html() {
@@ -132,12 +172,17 @@ _build_usage_summary_html() {
   M_RX_H=$(hr_mb "$M_RX"); M_TX_H=$(hr_mb "$M_TX")
   R_RX_H=$(hr_mb "$R_RX"); R_TX_H=$(hr_mb "$R_TX")
   HS_RX_H=$(hr_mb "$HS_RX"); HS_TX_H=$(hr_mb "$HS_TX")
+  E_RX_H=$(hr_mb "$E_RX"); E_TX_H=$(hr_mb "$E_TX")
+  B_RX_H=$(hr_mb "$B_RX"); B_TX_H=$(hr_mb "$B_TX")
 
   SUMMARY="<b>${title}</b>\n<code>────────────────────────</code>\n\n"
-  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi</b> <i>(wlan0)</i>\n └ RX <code>${W_RX_H}</code> · TX <code>${W_TX_H}</code>\n\n"
+  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi STA</b> <i>(wlan[0-9], trừ wlan1/ap)</i>\n └ RX <code>${W_RX_H}</code> · TX <code>${W_TX_H}</code>\n\n"
+  SUMMARY="${SUMMARY}🖧 <b>Ethernet</b> <i>(eth*)</i>\n └ RX <code>${E_RX_H}</code> · TX <code>${E_TX_H}</code>\n\n"
+  SUMMARY="${SUMMARY}🔗 <b>Bond</b> <i>(bond*)</i>\n └ RX <code>${B_RX_H}</code> · TX <code>${B_TX_H}</code>\n\n"
   SUMMARY="${SUMMARY}📶 <b>Mobile</b> <i>(rmnet*)</i>\n └ RX <code>${M_RX_H}</code> · TX <code>${M_TX_H}</code>\n\n"
   SUMMARY="${SUMMARY}🔌 <b>RNDIS</b> <i>(rndis*)</i>\n └ RX <code>${R_RX_H}</code> · TX <code>${R_TX_H}</code>\n\n"
   SUMMARY="${SUMMARY}📡 <b>Hotspot</b> <i>(p2p0/wlan1…)</i>\n └ RX <code>${HS_RX_H}</code> · TX <code>${HS_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}\n<i>Ưu tiên <code>dumpsys netstats</code> (rồi <code>/proc/net/dev</code> / sysfs). Là lưu lượng theo giao diện, tích lũy theo thời gian — không trùng với màn “dung lượng dữ liệu” trong Cài đặt.</i>\n"
 
   if [ "${DEBUG:-0}" = "1" ] && [ -r /proc/net/dev ]; then
     debug_list=$(awk '
@@ -149,6 +194,8 @@ _build_usage_summary_html() {
         if(iface=="p2p0" || iface=="wlan1" || iface=="ap0" || iface=="br0" || iface=="usb0" || iface ~ /rmnet_usb/ || iface ~ /^usb/){
           printf("HOTSPOT %s: RX=%d TX=%d\n", iface, rx, tx)
         }
+        if(iface ~ /^eth/){ printf("ETH %s: RX=%d TX=%d\n", iface, rx, tx) }
+        if(iface ~ /^bond/){ printf("BOND %s: RX=%d TX=%d\n", iface, rx, tx) }
       }
     ' /proc/net/dev)
     SUMMARY="${SUMMARY}\n<code>${debug_list}</code>"
@@ -178,9 +225,13 @@ handle_shutdown() {
   M_RX_H=$(hr_mb "$M_RX"); M_TX_H=$(hr_mb "$M_TX")
   R_RX_H=$(hr_mb "$R_RX"); R_TX_H=$(hr_mb "$R_TX")
   HS_RX_H=$(hr_mb "$HS_RX"); HS_TX_H=$(hr_mb "$HS_TX")
+  E_RX_H=$(hr_mb "$E_RX"); E_TX_H=$(hr_mb "$E_TX")
+  B_RX_H=$(hr_mb "$B_RX"); B_TX_H=$(hr_mb "$B_TX")
 
   SUMMARY="📊 <b>Tổng lưu lượng trước tắt máy:</b>\n\n"
-  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi (wlan0):</b> <code>RX ${W_RX_H} | TX ${W_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi STA (wlan*):</b> <code>RX ${W_RX_H} | TX ${W_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}🖧 <b>Ethernet (eth*):</b> <code>RX ${E_RX_H} | TX ${E_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}🔗 <b>Bond (bond*):</b> <code>RX ${B_RX_H} | TX ${B_TX_H}</code>\n"
   SUMMARY="${SUMMARY}📶 <b>Mobile (rmnet*):</b> <code>RX ${M_RX_H} | TX ${M_TX_H}</code>\n"
   SUMMARY="${SUMMARY}🔌 <b>RNDIS (rndis*):</b> <code>RX ${R_RX_H} | TX ${R_TX_H}</code>\n"
   SUMMARY="${SUMMARY}📡 <b>Hotspot (p2p0/wlan1/ap0/br0/usb*):</b> <code>RX ${HS_RX_H} | TX ${HS_TX_H}</code>\n"
@@ -195,6 +246,8 @@ handle_shutdown() {
         if(iface=="p2p0" || iface=="wlan1" || iface=="ap0" || iface=="br0" || iface=="usb0" || iface ~ /rmnet_usb/ || iface ~ /^usb/){
           printf("HOTSPOT %s: RX=%d TX=%d\n", iface, rx, tx)
         }
+        if(iface ~ /^eth/){ printf("ETH %s: RX=%d TX=%d\n", iface, rx, tx) }
+        if(iface ~ /^bond/){ printf("BOND %s: RX=%d TX=%d\n", iface, rx, tx) }
       }
     ' /proc/net/dev)
     SUMMARY="${SUMMARY}\n<code>DEBUG interfaces:\n${debug_list}</code>"
@@ -233,9 +286,13 @@ handle_restart() {
   M_RX_H=$(hr_mb "$M_RX"); M_TX_H=$(hr_mb "$M_TX")
   R_RX_H=$(hr_mb "$R_RX"); R_TX_H=$(hr_mb "$R_TX")
   HS_RX_H=$(hr_mb "$HS_RX"); HS_TX_H=$(hr_mb "$HS_TX")
+  E_RX_H=$(hr_mb "$E_RX"); E_TX_H=$(hr_mb "$E_TX")
+  B_RX_H=$(hr_mb "$B_RX"); B_TX_H=$(hr_mb "$B_TX")
 
   SUMMARY="📊 <b>Tổng lưu lượng trước khởi động lại:</b>\n\n"
-  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi (wlan0):</b> <code>RX ${W_RX_H} | TX ${W_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi STA (wlan*):</b> <code>RX ${W_RX_H} | TX ${W_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}🖧 <b>Ethernet (eth*):</b> <code>RX ${E_RX_H} | TX ${E_TX_H}</code>\n"
+  SUMMARY="${SUMMARY}🔗 <b>Bond (bond*):</b> <code>RX ${B_RX_H} | TX ${B_TX_H}</code>\n"
   SUMMARY="${SUMMARY}📶 <b>Mobile (rmnet*):</b> <code>RX ${M_RX_H} | TX ${M_TX_H}</code>\n"
   SUMMARY="${SUMMARY}🔌 <b>RNDIS (rndis*):</b> <code>RX ${R_RX_H} | TX ${R_TX_H}</code>\n"
   SUMMARY="${SUMMARY}📡 <b>Hotspot (p2p0/wlan1/ap0/br0/usb*):</b> <code>RX ${HS_RX_H} | TX ${HS_TX_H}</code>\n"
@@ -250,6 +307,8 @@ handle_restart() {
         if(iface=="p2p0" || iface=="wlan1" || iface=="ap0" || iface=="br0" || iface=="usb0" || iface ~ /rmnet_usb/ || iface ~ /^usb/){
           printf("HOTSPOT %s: RX=%d TX=%d\n", iface, rx, tx)
         }
+        if(iface ~ /^eth/){ printf("ETH %s: RX=%d TX=%d\n", iface, rx, tx) }
+        if(iface ~ /^bond/){ printf("BOND %s: RX=%d TX=%d\n", iface, rx, tx) }
       }
     ' /proc/net/dev)
     SUMMARY="${SUMMARY}\n<code>DEBUG interfaces:\n${debug_list}</code>"
@@ -270,82 +329,8 @@ handle_restart() {
 handle_datausage() {
   send_code "📡 Đang tổng hợp số liệu mạng (realtime)..."
 
-  if [ ! -r /proc/net/dev ]; then
-    send_code "⚠️ Không thể đọc /proc/net/dev (quyền hoặc file không tồn tại)."
-    return 1
-  fi
-
   DEBUG=${DEBUG:-0}
-  totals=$(awk -v dbg="$DEBUG" '
-    NR>2 {
-      line=$0
-      sub(/^[ \t]+/, "", line)
-      split(line, parts, ":")
-      iface=parts[1]
-      split(parts[2], a)
-      rx = (a[1] + 0)
-      tx = (a[9] + 0)
-
-      if(iface=="wlan0"){ w_rx+=rx; w_tx+=tx; next }
-
-      if(iface ~ /^rmnet/ || iface ~ /^ccmni/ || iface ~ /^rmnet_data/){ m_rx+=rx; m_tx+=tx; next }
-
-      if(iface ~ /^rndis/){
-        r_rx+=rx; r_tx+=tx
-        if(dbg==1) printf("DEBUG_RNDIS %s %d %d\n", iface, rx, tx) > "/dev/stderr"
-        next
-      }
-
-      if(iface=="p2p0" || iface=="wlan1" || iface=="ap0" || iface=="br0" || iface=="usb0" || iface ~ /rmnet_usb/ || iface ~ /^usb/){
-        h_rx+=rx; h_tx+=tx
-        if(dbg==1) printf("DEBUG_HOTSPOT %s %d %d\n", iface, rx, tx) > "/dev/stderr"
-        next
-      }
-    }
-    END{
-      if(w_rx=="") w_rx=0; if(w_tx=="") w_tx=0;
-      if(m_rx=="") m_rx=0; if(m_tx=="") m_tx=0;
-      if(r_rx=="") r_rx=0; if(r_tx=="") r_tx=0;
-      if(h_rx=="") h_rx=0; if(h_tx=="") h_tx=0;
-      printf "%d %d %d %d %d %d %d %d\n", w_rx, w_tx, m_rx, m_tx, r_rx, r_tx, h_rx, h_tx
-    }
-  ' /proc/net/dev 2>/dev/null)
-
-  if [ -z "$totals" ]; then
-    totals="$(_totals_fallback_sysfs)"
-  fi
-
-  set -- $totals
-  W_RX=${1:-0}; W_TX=${2:-0}
-  M_RX=${3:-0}; M_TX=${4:-0}
-  R_RX=${5:-0}; R_TX=${6:-0}
-  HS_RX=${7:-0}; HS_TX=${8:-0}
-
-  W_RX_H=$(hr_mb "$W_RX"); W_TX_H=$(hr_mb "$W_TX")
-  M_RX_H=$(hr_mb "$M_RX"); M_TX_H=$(hr_mb "$M_TX")
-  R_RX_H=$(hr_mb "$R_RX"); R_TX_H=$(hr_mb "$R_TX")
-  HS_RX_H=$(hr_mb "$HS_RX"); HS_TX_H=$(hr_mb "$HS_TX")
-
-  SUMMARY="<b>📊 Báo cáo lưu lượng realtime:</b>\n\n"
-  SUMMARY="${SUMMARY}🔵 <b>Wi‑Fi (wlan0):</b> <code>RX ${W_RX_H} | TX ${W_TX_H}</code>\n"
-  SUMMARY="${SUMMARY}📶 <b>Mobile (rmnet*):</b> <code>RX ${M_RX_H} | TX ${M_TX_H}</code>\n"
-  SUMMARY="${SUMMARY}🔌 <b>RNDIS (rndis*):</b> <code>RX ${R_RX_H} | TX ${R_TX_H}</code>\n"
-  SUMMARY="${SUMMARY}📡 <b>Hotspot (p2p0/wlan1/ap0/br0/usb*):</b> <code>RX ${HS_RX_H} | TX ${HS_TX_H}</code>\n"
-
-  if [ "${DEBUG:-0}" = "1" ]; then
-    debug_list=$(awk '
-      NR>2 {
-        line=$0; sub(/^[ \t]+/, "", line)
-        split(line, parts, ":"); iface=parts[1]; split(parts[2], a)
-        rx=a[1]+0; tx=a[9]+0
-        if(iface ~ /^rndis/){ printf("RNDIS %s: RX=%d TX=%d\n", iface, rx, tx) }
-        if(iface=="p2p0" || iface=="wlan1" || iface=="ap0" || iface=="br0" || iface=="usb0" || iface ~ /rmnet_usb/ || iface ~ /^usb/){
-          printf("HOTSPOT %s: RX=%d TX=%d\n", iface, rx, tx)
-        }
-      }
-    ' /proc/net/dev)
-    SUMMARY="${SUMMARY}\n<code>DEBUG interfaces:\n${debug_list}</code>"
-  fi
+  SUMMARY="$(_build_usage_summary_html "📊 Báo cáo lưu lượng realtime")"
 
   send_code "$SUMMARY"
   return 0

@@ -5,6 +5,7 @@ handle_monitor_changes() {
   last_charge="$(get_charge_state_simple)"
   last_rndis="$(get_rndis_state_simple)"
   last_hotspot="$(get_hotspot_state_simple)"
+  last_low_batt_warned=0
 
   while true; do
     cur_charge="$(get_charge_state_simple)"
@@ -38,6 +39,20 @@ handle_monitor_changes() {
         send_code "📡 Hotspot: <b>KHÔNG RÕ</b>"
       fi
       last_hotspot="$cur_hotspot"
+    fi
+
+    lvl="$(get_batt_level_int)"
+    if [ -n "$lvl" ] && [ "$lvl" -lt 10 ] 2>/dev/null; then
+      if [ "$cur_charge" = "charging" ]; then
+        last_low_batt_warned=0
+      else
+        if [ "$last_low_batt_warned" != "1" ]; then
+          send_code "🪫 <b>Pin yếu (${lvl}%)</b>\nCòn dưới 10% — vui lòng <b>sạc pin</b> ngay."
+          last_low_batt_warned=1
+        fi
+      fi
+    else
+      last_low_batt_warned=0
     fi
 
     sleep 5

@@ -3,6 +3,15 @@ export type Lang = "vi" | "en";
 export const STR = {
   vi: {
     skipToContent: "Bỏ qua đến nội dung",
+    brandName: "TelegramControl",
+    brandHomeAria: "TelegramControl — về trang chủ",
+    siteKeywordsLine: "Magisk · Telegram · Android",
+    heroEyebrow:
+      "Module Magisk nhúng Telegram bot · điều khiển thiết bị Android từ xa",
+    mastheadNavAria: "Giao diện và ngôn ngữ",
+    themeGroupAria: "Chế độ giao diện",
+    langGroupAria: "Ngôn ngữ hiển thị",
+    formSectionTitle: "Cấu hình & tải ZIP",
     donateQrAlt:
       "Mã QR VietQR ủng hộ — MB Bank 0968884946 — Võ Hoàng Hải Nghĩa",
     title: "TelegramControl · Builder ZIP module",
@@ -11,6 +20,17 @@ export const STR = {
     tokenLabel: "Bot token (@BotFather)",
     chatLabel: "Chat ID",
     chatPh: "-100xxxxxxxx hoặc số User ID",
+    hotspotFieldsetLegend: "Hotspot mặc định (/hotspot_on không thêm đối số)",
+    hotspotSsidLabel: "Tên Wi‑Fi (SSID)",
+    hotspotSsidPh: "Để trống = Hotspot",
+    hotspotPassLabel: "Mật khẩu Wi‑Fi",
+    hotspotPassPh: "Để trống = 12345678",
+    hotspotPassShow: "Hiện",
+    hotspotPassHide: "Ẩn",
+    hotspotPassShowAria: "Hiện mật khẩu Wi‑Fi",
+    hotspotPassHideAria: "Ẩn mật khẩu Wi‑Fi",
+    hotspotHint:
+      "SSID và mật khẩu đều phân biệt chữ hoa/thường — nhập đúng từng ký tự. Khi gõ /hotspot_on không kèm tên/mật khẩu, module dùng các giá trị nhập ở đây (hoặc mặc định Hotspot / 12345678 nếu để trống).",
     anydeskAutoMediaLabel:
       "Tự động cấp quyền media cho AnyDesk (PROJECT_MEDIA) — mặc định tắt, tích để bật.",
     submit: "Tải TelegramControl.zip",
@@ -33,6 +53,15 @@ export const STR = {
   },
   en: {
     skipToContent: "Skip to content",
+    brandName: "TelegramControl",
+    brandHomeAria: "TelegramControl — home",
+    siteKeywordsLine: "Magisk · Telegram · Android",
+    heroEyebrow:
+      "Magisk module with Telegram bot · remote control for Android devices",
+    mastheadNavAria: "Appearance and language",
+    themeGroupAria: "Theme",
+    langGroupAria: "Language",
+    formSectionTitle: "Configure & download ZIP",
     donateQrAlt:
       "VietQR donate — MB Bank 0968884946 — Vo Hoang Hai Nghia",
     title: "TelegramControl · Magisk ZIP builder",
@@ -41,6 +70,17 @@ export const STR = {
     tokenLabel: "Bot token (@BotFather)",
     chatLabel: "Chat ID",
     chatPh: "-100xxxxxxxx or numeric user ID",
+    hotspotFieldsetLegend: "Default hotspot (plain /hotspot_on with no arguments)",
+    hotspotSsidLabel: "Wi‑Fi name (SSID)",
+    hotspotSsidPh: "Leave empty for Hotspot",
+    hotspotPassLabel: "Wi‑Fi password",
+    hotspotPassPh: "Leave empty for 12345678",
+    hotspotPassShow: "Show",
+    hotspotPassHide: "Hide",
+    hotspotPassShowAria: "Show Wi‑Fi password",
+    hotspotPassHideAria: "Hide Wi‑Fi password",
+    hotspotHint:
+      "SSID and password are case-sensitive — type each character exactly. For /hotspot_on with no extra text, the module uses these values (or defaults Hotspot / 12345678 when left blank).",
     anydeskAutoMediaLabel:
       "Auto-grant AnyDesk media permission (PROJECT_MEDIA) — off by default; check to enable.",
     submit: "Download TelegramControl.zip",

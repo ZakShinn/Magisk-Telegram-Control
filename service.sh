@@ -16,6 +16,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/telephony.sh"
 # shellcheck source=/dev/null
+. "${SCRIPT_DIR}/lib/ttl_tether.sh"
+# shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/usb_wifi.sh"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/netstats.sh"
@@ -24,13 +26,19 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/status.sh"
 # shellcheck source=/dev/null
+. "${SCRIPT_DIR}/lib/loop.sh"
+# shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/monitor.sh"
 # shellcheck source=/dev/null
 [ -f "${SCRIPT_DIR}/lib/anydesk.sh" ] && . "${SCRIPT_DIR}/lib/anydesk.sh"
 
 BOT_OFFSET_FILE="/data/local/tmp/tg_device_bot_offset"
+LOOP_PID_FILE="/data/local/tmp/tg_device_bot_loop_pids"
 
 start_anydesk_auto_media_loop || true
+
+# Tiến trình /loop_on không sống sót qua khởi động lại service; xóa PID cũ tránh kill nhầm.
+rm -f "$LOOP_PID_FILE" 2>/dev/null || true
 
 if [ -f "$BOT_OFFSET_FILE" ]; then
   OFFSET="$(cat "$BOT_OFFSET_FILE" 2>/dev/null || echo 0)"

@@ -21,6 +21,9 @@ export default function HomePage() {
 
   const [token, setToken] = useState("");
   const [chatId, setChatId] = useState("");
+  const [hotspotSsid, setHotspotSsid] = useState("");
+  const [hotspotPass, setHotspotPass] = useState("");
+  const [hotspotPassVisible, setHotspotPassVisible] = useState(false);
   const [anydeskAutoMedia, setAnydeskAutoMedia] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +73,8 @@ export default function HomePage() {
         body: JSON.stringify({
           token: token.trim(),
           chatId: chatId.trim(),
+          hotspotSsid: hotspotSsid.trim(),
+          hotspotPass,
           anydeskAutoMedia,
         }),
       });
@@ -103,45 +108,66 @@ export default function HomePage() {
       <a href="#main-content" className="skip-link">
         {t.skipToContent}
       </a>
-      <header className="toolbar">
-        <div className="toggle-group" role="group" aria-label="Theme">
-          <button
-            type="button"
-            className={theme === "dark" ? "active" : ""}
-            onClick={() => setTheme("dark")}
-          >
-            {t.themeDark}
-          </button>
-          <button
-            type="button"
-            className={theme === "light" ? "active" : ""}
-            onClick={() => setTheme("light")}
-          >
-            {t.themeLight}
-          </button>
-        </div>
-        <div className="toggle-group" role="group" aria-label="Language">
-          <button
-            type="button"
-            className={lang === "vi" ? "active" : ""}
-            onClick={() => setLang("vi")}
-          >
-            {t.langVi}
-          </button>
-          <button
-            type="button"
-            className={lang === "en" ? "active" : ""}
-            onClick={() => setLang("en")}
-          >
-            {t.langEn}
-          </button>
-        </div>
+      <header className="site-header">
+        <a href="/" className="site-brand" aria-label={t.brandHomeAria}>
+          <span className="brand-mark" aria-hidden="true">
+            <span className="brand-mark-text">TC</span>
+          </span>
+          <span className="brand-text">
+            <span className="brand-name">{t.brandName}</span>
+            <span className="brand-tagline">{t.siteKeywordsLine}</span>
+          </span>
+        </a>
+        <nav className="masthead-nav" aria-label={t.mastheadNavAria}>
+          <div className="toggle-group" role="group" aria-label={t.themeGroupAria}>
+            <button
+              type="button"
+              className={theme === "dark" ? "active" : ""}
+              onClick={() => setTheme("dark")}
+            >
+              {t.themeDark}
+            </button>
+            <button
+              type="button"
+              className={theme === "light" ? "active" : ""}
+              onClick={() => setTheme("light")}
+            >
+              {t.themeLight}
+            </button>
+          </div>
+          <div className="toggle-group" role="group" aria-label={t.langGroupAria}>
+            <button
+              type="button"
+              className={lang === "vi" ? "active" : ""}
+              onClick={() => setLang("vi")}
+            >
+              {t.langVi}
+            </button>
+            <button
+              type="button"
+              className={lang === "en" ? "active" : ""}
+              onClick={() => setLang("en")}
+            >
+              {t.langEn}
+            </button>
+          </div>
+        </nav>
       </header>
 
       <main id="main-content" className="main-content" tabIndex={-1}>
-        <article className="card" aria-labelledby="page-title">
+        <section className="hero" aria-labelledby="page-title">
+          <p className="hero-eyebrow">{t.heroEyebrow}</p>
           <h1 id="page-title">{t.title}</h1>
           <p className="lead">{t.lead}</p>
+        </section>
+
+        <article
+          className="card form-card"
+          aria-labelledby="form-section-title"
+        >
+          <h2 id="form-section-title" className="form-section-title">
+            {t.formSectionTitle}
+          </h2>
 
           <form onSubmit={downloadZip} aria-busy={loading}>
           <div className="field">
@@ -169,6 +195,54 @@ export default function HomePage() {
               spellCheck={false}
             />
           </div>
+
+          <fieldset className="hotspot-fieldset">
+            <legend className="hotspot-legend">{t.hotspotFieldsetLegend}</legend>
+            <div className="field">
+              <label htmlFor="hotspotSsid">{t.hotspotSsidLabel}</label>
+              <input
+                id="hotspotSsid"
+                name="hotspotSsid"
+                autoComplete="off"
+                placeholder={t.hotspotSsidPh}
+                value={hotspotSsid}
+                onChange={(ev) => setHotspotSsid(ev.target.value)}
+                spellCheck={false}
+                autoCapitalize="none"
+                autoCorrect="off"
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="hotspotPass">{t.hotspotPassLabel}</label>
+              <div className="password-input-row">
+                <input
+                  id="hotspotPass"
+                  name="hotspotPass"
+                  type={hotspotPassVisible ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder={t.hotspotPassPh}
+                  value={hotspotPass}
+                  onChange={(ev) => setHotspotPass(ev.target.value)}
+                  spellCheck={false}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setHotspotPassVisible((v) => !v)}
+                  aria-pressed={hotspotPassVisible}
+                  aria-label={
+                    hotspotPassVisible ? t.hotspotPassHideAria : t.hotspotPassShowAria
+                  }
+                  aria-controls="hotspotPass"
+                >
+                  {hotspotPassVisible ? t.hotspotPassHide : t.hotspotPassShow}
+                </button>
+              </div>
+            </div>
+            <p className="hotspot-hint">{t.hotspotHint}</p>
+          </fieldset>
 
           <div className="field checkbox-field">
             <label className="checkbox-label">

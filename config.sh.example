@@ -3,24 +3,17 @@
 TELEGRAM_TOKEN=""
 TELEGRAM_CHAT_ID=""
 
-# SMS_FORWARD=1 — gửi SMS mới đến SIM lên Telegram. Trang tải ZIP bật sẵn ô chuyển tiếp SMS nên config sinh ra thường là 1 (bỏ tích nếu không muốn).
-# OTP có thể lộ; cần ROM cho phép content://sms hoặc đọc kho SMS.
-SMS_FORWARD="${SMS_FORWARD:-0}"
 
 # Tuỳ chọn — long polling Telegram (mặc định trong service.sh: 50s / curl max 75s)
 # TG_POLL_TIMEOUT=50
 # TG_CURL_MAX_TIME=75
 
-# TTL tether (iptables mangle): chỉ chạy khi bạn gõ /ttl hoặc /ttl_sync trên Telegram (không tự chạy khi bật hotspot/RNDIS hay lúc boot).
-# Khi gõ /ttl không kèm số: dùng TETHER_TTL_VALUE (nếu đặt) rồi sysctl net.ipv4.ip_default_ttl (fallback 65).
-# TETHER_TTL_FIX chỉ còn tác dụng nếu script ngoài gọi ttl_tether_sync() (bot không gọi nữa).
-TETHER_TTL_FIX="${TETHER_TTL_FIX:-1}"
-# TETHER_TTL_VALUE=65
 
 # Gói AnyDesk (PROJECT_MEDIA).
 # ANYDESK_PKG=com.anydesk.anydeskandroid
 
-# /ping: danh sách host DNS hoặc IP (cách nhau bằng khoảng trắng).
-# TG_PING_DNS="8.8.8.8 1.1.1.1"
+# Hotspot: khi gõ /hotspot_on không kèm SSID/mật khẩu.
+# Có thể gõ: /hotspot_on TênWifi MậtKhẩu (mật khẩu được phép nhiều từ).
+# HOTSPOT_SSID="MyHotspot"
+# HOTSPOT_PASS="ban_mat_khau"
 
-# Bot đăng ký menu lệnh (api setMyCommands) khi khởi động — chỉ có tác dụng với Telegram, không đổi quyền bot.

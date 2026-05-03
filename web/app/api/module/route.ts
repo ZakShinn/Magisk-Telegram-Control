@@ -12,6 +12,15 @@ function shSingleQuoted(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;
 }
 
+function utf8ByteLength(value: string): number {
+  return Buffer.byteLength(value, "utf8");
+}
+
+function hasBadControlChars(value: string): boolean {
+  // C0 controls and DEL (incl. tab/newline; newlines are rejected above too)
+  return /[\0-\x1F\x7F]/.test(value);
+}
+
 function jsonBilingual(status: number, vi: string, en: string) {
   return NextResponse.json({ errorVi: vi, errorEn: en }, { status });
 }
@@ -38,6 +47,15 @@ export async function POST(req: Request) {
       ? String((body as { chatId?: unknown }).chatId ?? "").trim()
       : "";
 
+  const hotspotSsid =
+    typeof body === "object" && body !== null && "hotspotSsid" in body
+      ? String((body as { hotspotSsid?: unknown }).hotspotSsid ?? "").trim()
+      : "";
+  const hotspotPass =
+    typeof body === "object" && body !== null && "hotspotPass" in body
+      ? String((body as { hotspotPass?: unknown }).hotspotPass ?? "")
+      : "";
+
   if (!TOKEN_RE.test(token)) {
     return jsonBilingual(
       400,
@@ -51,6 +69,42 @@ export async function POST(req: Request) {
       400,
       "Chat ID không đúng định dạng.",
       "Chat ID format looks invalid.",
+    );
+  }
+
+  if (hotspotSsid.includes("\n") || hotspotSsid.includes("\r")) {
+    return jsonBilingual(
+      400,
+      "Tên Wi‑Fi không được chứa xuống dòng.",
+      "SSID must not contain line breaks.",
+    );
+  }
+  if (hotspotPass.includes("\n") || hotspotPass.includes("\r")) {
+    return jsonBilingual(
+      400,
+      "Mật khẩu không được chứa xuống dòng.",
+      "Password must not contain line breaks.",
+    );
+  }
+  if (hasBadControlChars(hotspotSsid) || hasBadControlChars(hotspotPass)) {
+    return jsonBilingual(
+      400,
+      "SSID hoặc mật khẩu có ký tự không hợp lệ.",
+      "SSID or password contains invalid characters.",
+    );
+  }
+  if (utf8ByteLength(hotspotSsid) > 32) {
+    return jsonBilingual(
+      400,
+      "Tên Wi‑Fi quá dài (tối đa 32 byte UTF‑8).",
+      "SSID is too long (max 32 UTF‑8 bytes).",
+    );
+  }
+  if (utf8ByteLength(hotspotPass) > 63) {
+    return jsonBilingual(
+      400,
+      "Mật khẩu quá dài (tối đa 63 byte UTF‑8, WPA2).",
+      "Password is too long (max 63 UTF‑8 bytes for WPA2).",
     );
   }
 
@@ -94,11 +148,25 @@ export async function POST(req: Request) {
     else zip.file(name, fs.readFileSync(abs));
   }
 
+  let hotspotBlock = "";
+  if (hotspotSsid !== "") {
+    hotspotBlock += `HOTSPOT_SSID=${shSingleQuoted(hotspotSsid)}\n`;
+  }
+  if (hotspotPass !== "") {
+    hotspotBlock += `HOTSPOT_PASS=${shSingleQuoted(hotspotPass)}\n`;
+  }
+  if (hotspotBlock !== "") {
+    hotspotBlock =
+      `\n# Default hotspot when sending plain /hotspot_on (no SSID/password args)\n` +
+      hotspotBlock;
+  }
+
   const configBody =
     `# TelegramControl — sinh tự động (đừng chia sẻ file này)\n` +
     `TELEGRAM_TOKEN=${shSingleQuoted(token)}\n` +
     `TELEGRAM_CHAT_ID=${shSingleQuoted(chatId)}\n` +
-    (anydeskAutoMedia ? `ANYDESK_AUTO_MEDIA=1\n` : "");
+    (anydeskAutoMedia ? `ANYDESK_AUTO_MEDIA=1\n` : "") +
+    hotspotBlock;
 
   zip.file("config.sh", configBody);
 

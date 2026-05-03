@@ -1,12 +1,8 @@
 # shellcheck shell=sh
 # Sóng, loại mạng, band, IP công cộng
 
-get_dbm() {
-  v="$(getprop_safe sm.signalstrength)"
-  if echo "$v" | grep -qE '^-?[0-9]+'; then echo "$v"; return; fi
-  v="$(getprop_safe gsm.signalstrength)"
-  if echo "$v" | grep -qE '^-?[0-9]+'; then echo "$v"; return; fi
-  out="$(dumpsys telephony.registry 2>/dev/null || dumpsys telephony 2>/dev/null || true)"
+get_dbm_from_dump() {
+  out="$1"
   for key in lteRsrp mLteRsrp rsrp mSignalStrengthDbm cdmaDbm dbm; do
     v="$(echo "$out" | grep -oE "${key}=[-]?[0-9]+" | head -n1 | sed 's/[^-0-9]//g')"
     [ -n "$v" ] && { echo "$v"; return; }
@@ -19,6 +15,15 @@ get_dbm() {
   asu="$(echo "$out" | grep -oE 'gsmSignalStrength=[0-9]+' | head -n1 | cut -d= -f2)"
   if [ -n "$asu" ]; then echo $(( -113 + 2 * asu )); return; fi
   echo "N/A"
+}
+
+get_dbm() {
+  v="$(getprop_safe sm.signalstrength)"
+  if echo "$v" | grep -qE '^-?[0-9]+'; then echo "$v"; return; fi
+  v="$(getprop_safe gsm.signalstrength)"
+  if echo "$v" | grep -qE '^-?[0-9]+'; then echo "$v"; return; fi
+  out="$(dumpsys telephony.registry 2>/dev/null || dumpsys telephony 2>/dev/null || true)"
+  get_dbm_from_dump "$out"
 }
 
 map_sig_quality() {
@@ -127,7 +132,7 @@ $TEL"
 get_nettype_with_desc() {
   base="$(get_nettype)"
   case "$base" in
-    "5G") echo "5G (SA hoặc NSA — theo báo ROM/SIM)" ;;
+    "5G") echo "5G (SA = Standalone, 5G thuần; NSA = Non-Standalone, 5G neo trên 4G LTE)" ;;
     "5G (SA)") echo "5G (SA) – 5G độc lập (Standalone)" ;;
     "LTE+NR (NSA)") echo "LTE+NR (NSA) – 4G LTE + 5G (Non-Standalone)" ;;
     "LTE") echo "LTE – 4G LTE" ;;
@@ -163,8 +168,8 @@ get_operator_name() {
   fi
 }
 
-get_band_info() {
-  out="$(dumpsys telephony 2>/dev/null || true; dumpsys telephony.registry 2>/dev/null || true)"
+get_band_info_from_dump() {
+  out="$1"
 
   nr_band="$(
     echo "$out" | grep -oiE 'nr[Bb]and[: =][nN]?[0-9]+' | head -n1 | sed -E 's/.*[=: ]//; s/^n?([0-9]+)$/n\1/'
@@ -199,6 +204,70 @@ get_band_info() {
   fi
 
   echo ""
+}
+
+get_band_info() {
+  out="$(dumpsys telephony 2>/dev/null || true; dumpsys telephony.registry 2>/dev/null || true)"
+  get_band_info_from_dump "$out"
+}
+
+# Chỉ số phụ từ dump (ROM/modem khác nhau → có thể thiếu)
+get_rsrq_db_from_dump() {
+  echo "$1" | grep -oiE '(ssRsrq|lteRsrq|rsrq)[=:]-?[0-9]+' | head -n1 | grep -oE '-?[0-9]+' | head -n1
+}
+
+get_sinr_db_from_dump() {
+  echo "$1" | grep -oiE '(ssSinr|ssSNR|lteRssnr|rssnr|nrSsSinr)[=:]-?[0-9]+' | head -n1 | grep -oE '-?[0-9]+' | head -n1
+}
+
+get_voice_data_rat_lines_from_dump() {
+  dump="$1"
+  vn="$(echo "$dump" | grep -oE 'mVoiceNetworkType=[0-9]+' | head -n1 | cut -d= -f2)"
+  dn="$(echo "$dump" | grep -oE 'mDataNetworkType=[0-9]+' | head -n1 | cut -d= -f2)"
+  [ -z "$vn" ] && [ -z "$dn" ] && return
+  vr=""
+  dr=""
+  echo "$vn" | grep -qE '^[0-9]+$' && vr="$(rat_num_to_name "$vn")"
+  echo "$dn" | grep -qE '^[0-9]+$' && dr="$(rat_num_to_name "$dn")"
+  [ -n "$vr" ] && echo "Thoại: ${vr}"
+  [ -n "$dr" ] && echo "Dữ liệu: ${dr}"
+}
+
+get_roaming_status_vi_from_dump() {
+  dump="$1"
+  if echo "$dump" | grep -qiE '(isVoiceRoaming|isDataRoaming|mVoiceRoaming|mDataRoaming)[=: ]+true'; then
+    echo "Chuyển vùng"
+  else
+    echo "Trong nước"
+  fi
+}
+
+# Thanh mức tín hiệu (ASCII an toàn trên mọi font)
+format_dbm_strength_meter() {
+  dbm="$1"
+  if ! echo "$dbm" | grep -qE '^-?[0-9]+$'; then
+    echo ""
+    return
+  fi
+  n=$(printf "%d" "$dbm")
+  pct=$(( (n + 120) * 100 / 70 ))
+  [ "$pct" -lt 0 ] && pct=0
+  [ "$pct" -gt 100 ] && pct=100
+  filled=$(( (pct * 8 + 50) / 100 ))
+  [ "$filled" -gt 8 ] && filled=8
+  empty=$(( 8 - filled ))
+  bar=""
+  i=0
+  while [ "$i" -lt "$filled" ]; do
+    bar="${bar}█"
+    i=$(( i + 1 ))
+  done
+  i=0
+  while [ "$i" -lt "$empty" ]; do
+    bar="${bar}░"
+    i=$(( i + 1 ))
+  done
+  echo "${bar} ${pct}%"
 }
 
 get_public_ip() {
