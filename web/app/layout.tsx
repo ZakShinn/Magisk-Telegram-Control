@@ -50,12 +50,21 @@ export const metadata: Metadata = {
     title: "TelegramControl — Magisk module builder",
     description:
       "Tải ZIP module Magisk đã nhúng Telegram bot · Download configured Magisk module for Android.",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "TelegramControl",
+      },
+    ],
   },
   twitter: {
     card: "summary",
     title: "TelegramControl — Magisk module builder",
     description:
       "Magisk ZIP + Telegram bot config.sh · Module điều khiển Android qua Telegram.",
+    images: ["/logo.png"],
   },
   robots: {
     index: true,
@@ -79,8 +88,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0a0508" },
-    { media: "(prefers-color-scheme: light)", color: "#f6fbff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0c0f14" },
+    { media: "(prefers-color-scheme: light)", color: "#eef2f9" },
   ],
 };
 

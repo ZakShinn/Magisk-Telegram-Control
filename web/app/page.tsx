@@ -139,9 +139,6 @@ export default function HomePage() {
                 className={theme === "dark" ? "active" : ""}
                 onClick={() => setTheme("dark")}
               >
-                <span className="seg-ico" aria-hidden="true">
-                  ⛧
-                </span>
                 {t.themeDark}
               </button>
               <button
@@ -149,9 +146,6 @@ export default function HomePage() {
                 className={theme === "light" ? "active" : ""}
                 onClick={() => setTheme("light")}
               >
-                <span className="seg-ico" aria-hidden="true">
-                  ✧
-                </span>
                 {t.themeLight}
               </button>
             </div>

@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "Build a Magisk module ZIP with Telegram bot config. · Tạo ZIP module nhúng Bot Token và Chat ID.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0a0508",
-    theme_color: "#12070e",
+    background_color: "#0c0f14",
+    theme_color: "#151a22",
     lang: "vi",
     icons: [
       {
