@@ -21,8 +21,8 @@ handle_help() {
 /hotspot_on [SSID MậtKhẩu]  - Bật hotspot (mặc định từ config hoặc Hotspot/12345678)
 /hotspot_off  - Tắt Hotspot (Phát wifi)
 
-/ttl_on       - Bật TTL tether (iptables mangle TTL/HL; có thể chờ ~30s FORWARD DROP)
-/ttl_off      - Gỡ rule TTL do bot gắn (POSTROUTING → tg_ttl_fix)
+/ttl_on       - TTL tether (giống module NFQTTL: DROP 30s → mangle nfqttli/nfqttlo; không cần nfqttl)
+/ttl_off      - Gỡ nfqttli/nfqttlo (TTL/HL do bot, hoặc NFQUEUE cũ)
 
 /shutdown     - Tắt máy
 /restart            - Khởi động lại
@@ -209,20 +209,20 @@ handle_battery() {
 }
 
 handle_ttl_on() {
-  send_code "⏳ /ttl_on: FORWARD DROP (mặc định 30s, có thể tắt bằng TETHER_TTL_DROP_WAIT=0) → iptables TTL + ip6tables HL. Đừng spam..."
+  send_code "⏳ /ttl_on: giống service.sh module NFQTTL (FORWARD DROP ~30s → nfqttli/nfqttlo với TTL/HL, không chạy nhị phân nfqttl). Đừng spam..."
   if ttl_on_run_script; then
-    send_code "✅ /ttl_on hoàn tất (iptables POSTROUTING → TTL / HL)."
+    send_code "✅ /ttl_on hoàn tất (PREROUTING/OUTPUT + IPv6 POSTROUTING; chain nfqttli/nfqttlo = TTL/HL)."
   else
     reason="$(escape_html "${TTL_ON_LAST_ERROR:-không xác định}")"
     send_code "❌ /ttl_on thất bại: ${reason}
 
-<i>Gợi ý: service Magisk cần chạy root (uid 0); thử <code>iptables -t mangle -A OUTPUT -j TTL --ttl-set 64</code> trong adb shell để xem kernel có TTL không; tuỳ chọn <code>TETHER_TTL_OUT_IFACE</code> (vd. rmnet_data0).</i>"
+<i>Gợi ý: uid 0; kernel cần target TTL/HL; thử <code>iptables -t mangle -A OUTPUT -j TTL --ttl-set 64</code>; tuỳ chọn <code>TETHER_TTL_OUT_IFACE</code>, <code>TETHER_TTL_POST_DROP_SLEEP</code>.</i>"
   fi
 }
 
 handle_ttl_off() {
   ttl_tether_clear 2>/dev/null || true
-  send_code "ℹ️ /ttl_off: đã gỡ chuỗi tg_ttl_fix / tg_ttl_fix6 (và rule NFQUEUE cũ nfqttli/nfqttlo nếu còn)."
+  send_code "ℹ️ /ttl_off: đã gỡ nfqttli/nfqttlo (TTL/HL hoặc NFQUEUE cũ) và chuỗi tg_ttl_* nếu còn."
 }
 
 # Chỉ cho phép ký tự an toàn cho đích ping (tránh chèn lệnh).
