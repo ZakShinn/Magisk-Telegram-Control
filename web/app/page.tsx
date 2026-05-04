@@ -299,6 +299,7 @@ export default function HomePage() {
               ) : null}
 
               <div className="hint">{t.hint}</div>
+              <p className="muted-note">{t.testedDevicesNote}</p>
             </form>
           </article>
 

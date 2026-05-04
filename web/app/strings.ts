@@ -38,6 +38,8 @@ export const STR = {
     submitting: "Đang đóng gói…",
     hint:
       "Sau khi cài và khởi động lại: chỉ Chat ID đã nhập mới có quyền điều khiển bot.",
+    testedDevicesNote:
+      "Đã test và chạy tốt trên thiết bị Samsung Galaxy Z Flip4 và Samsung Galaxy Z Fold4. Một số thiết bị có thể không tương thích.",
     errNetwork: "Không tải được — kiểm tra mạng hoặc thử lại.",
     errContactHint: "Nếu vẫn gặp lỗi hoặc cần hỗ trợ:",
     errContactLink: "liên hệ qua Facebook",
@@ -60,7 +62,7 @@ export const STR = {
     mastheadNavAria: "Appearance and language",
     themeGroupAria: "Theme",
     langGroupAria: "Language",
-    formSectionTitle: "Configure and Download Magisk Module",
+    formSectionTitle: "Configure & download Module Magisk",
     donateBankLabel: "Bank",
     donateQrAlt:
       "VietQR donate — MB Bank 0968884946 — Vo Hoang Hai Nghia",
@@ -88,6 +90,8 @@ export const STR = {
     submitting: "Building ZIP…",
     hint:
       "After install and reboot: only the Chat ID you entered can control the bot.",
+    testedDevicesNote:
+      "Tested and working on Samsung Galaxy Z Flip4 and Samsung Galaxy Z Fold4. Some devices may be incompatible.",
     errNetwork: "Download failed — check your connection and retry.",
     errContactHint: "If the problem persists or you need support:",
     errContactLink: "contact via Facebook",
