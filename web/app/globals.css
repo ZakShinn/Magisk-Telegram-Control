@@ -598,6 +598,30 @@ kbd {
   background: var(--input-bg);
 }
 
+.donate-qr-stack {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  justify-items: center;
+}
+
+.donate-qr-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.donate-qr-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
 .donate-qr {
   display: block;
   width: 220px;
@@ -636,6 +660,61 @@ kbd {
 
 .links-row a:hover {
   text-decoration: underline;
+}
+
+.donate-logo-row {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.donate-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: radial-gradient(
+      120% 120% at 20% 15%,
+      color-mix(in srgb, var(--accent) 25%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(180deg, var(--card), color-mix(in srgb, var(--card) 75%, transparent));
+  box-shadow: 0 16px 44px var(--shadow);
+}
+
+.donate-logo--paypal {
+  color: color-mix(in srgb, var(--accent) 85%, #1e4bd1 15%);
+}
+
+.donate-logo--bank {
+  color: color-mix(in srgb, var(--accent) 55%, #2bb673 45%);
+}
+
+.donate-signature {
+  margin-top: 10px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: -0.04em;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 85%, #7c3aed 15%),
+    color-mix(in srgb, var(--accent) 70%, #06b6d4 30%),
+    color-mix(in srgb, var(--accent) 80%, #f59e0b 20%)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow:
+    0 0 22px color-mix(in srgb, var(--accent) 45%, transparent),
+    0 10px 40px var(--shadow);
+  user-select: none;
 }
 
 .muted-note {

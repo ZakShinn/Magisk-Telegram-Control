@@ -8,6 +8,8 @@ const DONATE_STK = "0968884946";
 const DONATE_VIETQR_URL =
   "https://img.vietqr.io/image/MB-0968884946-compact.png?addTag=ZakshinTools";
 const DONATE_PAYPAL_URL = "https://paypal.me/Zakshin";
+const DONATE_PAYPAL_QR_URL =
+  "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fpaypal.me%2FZakshin";
 const CONTACT_FACEBOOK_URL =
   "https://www.facebook.com/profile.php?id=100006985387032";
 
@@ -305,22 +307,47 @@ export default function HomePage() {
           <aside className="card donate-card" aria-label={t.donateTitle}>
             <h2 className="donate-title">{t.donateTitle}</h2>
             <div className="donate-qr-wrap">
-              <img
-                className="donate-qr"
-                src={DONATE_VIETQR_URL}
-                width={220}
-                height={220}
-                alt={t.donateQrAlt}
-                decoding="async"
-                loading="lazy"
-                fetchPriority="low"
-              />
-              <div className="donate-meta">
-                <div>
-                  <strong>{t.donateRecipient}</strong>
+              <div className="donate-qr-stack">
+                <div className="donate-qr-block">
+                  <div className="donate-qr-label">{t.donateBankLabel}</div>
+                  <img
+                    className="donate-qr"
+                    src={DONATE_VIETQR_URL}
+                    width={220}
+                    height={220}
+                    alt={t.donateQrAlt}
+                    decoding="async"
+                    loading="lazy"
+                    fetchPriority="low"
+                  />
+                  <div className="donate-meta">
+                    <div>
+                      <strong>{t.donateRecipient}</strong>
+                    </div>
+                    <div className="bank">
+                      {t.donateBankName} · {DONATE_STK}
+                    </div>
+                  </div>
                 </div>
-                <div className="bank">
-                  {t.donateBankName} · {DONATE_STK}
+
+                <div className="donate-qr-block">
+                  <div className="donate-qr-label">{t.donatePaypalLabel}</div>
+                  <img
+                    className="donate-qr"
+                    src={DONATE_PAYPAL_QR_URL}
+                    width={220}
+                    height={220}
+                    alt={t.donatePaypalQrAlt}
+                    decoding="async"
+                    loading="lazy"
+                    fetchPriority="low"
+                  />
+                  <div className="donate-meta">
+                    <div>
+                      <strong>{t.donatePaypalHandle}</strong>
+                    </div>
+                    <div className="bank">{t.donatePaypalHint}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -340,6 +367,49 @@ export default function HomePage() {
               >
                 {t.donatePaypal}
               </a>
+            </div>
+
+            <div className="donate-logo-row" aria-hidden="true">
+              <span className="donate-logo donate-logo--bank" title="VietQR">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                  <path
+                    d="M4.5 7.5A3 3 0 0 1 7.5 4.5h9A3 3 0 0 1 19.5 7.5v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M8 9.5h3.2c1.3 0 2.1.8 2.1 1.9 0 1.2-.9 1.9-2.2 1.9H8V9.5Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M13.4 9.5H16v6"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+              <span className="donate-logo donate-logo--paypal" title="PayPal">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                  <path
+                    d="M7.2 18.5 9.1 5.9c.1-.8.8-1.4 1.6-1.4h5.3c3 0 4.7 1.6 4.2 4.4-.5 2.7-2.6 4.3-5.7 4.3h-2.4l-.7 5.3H7.2Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M10.6 19.5 12 9.5h3.3c2.3 0 3.7 1.1 3.3 3.2-.4 2-2 3-4.2 3H13l-.5 3.8h-1.9Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </div>
+            <div className="donate-signature" aria-hidden="true">
+              Zakshin
             </div>
 
             <p className="footer-tagline">{t.partnerFooter}</p>

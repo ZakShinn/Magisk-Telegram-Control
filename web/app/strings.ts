@@ -11,8 +11,13 @@ export const STR = {
     themeGroupAria: "Chế độ giao diện",
     langGroupAria: "Ngôn ngữ hiển thị",
     formSectionTitle: "Cấu hình & tải ZIP",
+    donateBankLabel: "Ngân hàng (VietQR)",
     donateQrAlt:
       "Mã QR VietQR ủng hộ — MB Bank 0968884946 — Võ Hoàng Hải Nghĩa",
+    donatePaypalLabel: "PayPal",
+    donatePaypalQrAlt: "QR PayPal donate — paypal.me/Zakshin",
+    donatePaypalHandle: "paypal.me/Zakshin",
+    donatePaypalHint: "Mở link hoặc quét QR để donate",
     title: "TelegramControl · Builder ZIP module",
     lead:
       "Nhập Bot Token và Chat ID để tạo file ZIP module Magisk đã nhúng config.sh. Tải về và flash trong Magisk như module thông thường.",
@@ -61,8 +66,13 @@ export const STR = {
     themeGroupAria: "Theme",
     langGroupAria: "Language",
     formSectionTitle: "Configure & download ZIP",
+    donateBankLabel: "Bank (VietQR)",
     donateQrAlt:
       "VietQR donate — MB Bank 0968884946 — Vo Hoang Hai Nghia",
+    donatePaypalLabel: "PayPal",
+    donatePaypalQrAlt: "PayPal donate QR — paypal.me/Zakshin",
+    donatePaypalHandle: "paypal.me/Zakshin",
+    donatePaypalHint: "Open the link or scan the QR to donate",
     title: "TelegramControl · Magisk ZIP builder",
     lead:
       "Enter your Bot Token and Chat ID to build a Magisk module ZIP with embedded config.sh. Download and flash in Magisk as usual.",
