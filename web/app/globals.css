@@ -622,6 +622,103 @@ kbd {
   text-transform: uppercase;
 }
 
+.paypal-tile {
+  width: 220px;
+  height: 220px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--accent) 70%, #1e4bd1 30%);
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: radial-gradient(
+      120% 120% at 20% 10%,
+      color-mix(in srgb, var(--accent) 28%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(90% 90% at 85% 20%, rgba(30, 75, 209, 0.18), transparent 55%),
+    linear-gradient(180deg, var(--card), color-mix(in srgb, var(--card) 70%, transparent));
+  box-shadow: 0 18px 50px var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.paypal-tile::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.14),
+    transparent
+  );
+  transform: translateX(-55%) rotate(12deg);
+  transition: transform 420ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  pointer-events: none;
+}
+
+.paypal-tile:hover::after {
+  transform: translateX(55%) rotate(12deg);
+}
+
+.paypal-tile-inner {
+  width: 100%;
+  height: 100%;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.paypal-mark {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+  background: radial-gradient(
+    120% 120% at 30% 20%,
+    rgba(30, 75, 209, 0.22),
+    transparent 60%
+  );
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+}
+
+.paypal-title {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.paypal-handle {
+  font-weight: 750;
+  font-size: 0.92rem;
+  color: color-mix(in srgb, var(--accent) 80%, #1e4bd1 20%);
+}
+
+.paypal-sub {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.paypal-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 70px var(--shadow);
+}
+
+.paypal-tile:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: 3px;
+}
+
 .donate-qr {
   display: block;
   width: 220px;
@@ -696,12 +793,35 @@ kbd {
   color: color-mix(in srgb, var(--accent) 55%, #2bb673 45%);
 }
 
-.donate-signature {
-  margin-top: 10px;
+.zakshin-logo {
+  margin-top: 12px;
+  width: 220px;
+  height: 220px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: radial-gradient(
+      110% 110% at 20% 15%,
+      color-mix(in srgb, var(--accent) 24%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(90% 90% at 85% 18%, rgba(124, 58, 237, 0.18), transparent 55%),
+    linear-gradient(180deg, var(--card), color-mix(in srgb, var(--card) 70%, transparent));
+  box-shadow: 0 18px 60px var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.zakshin-logo-inner {
   text-align: center;
-  font-weight: 900;
-  font-size: 1.05rem;
-  letter-spacing: -0.04em;
+  padding: 18px;
+}
+
+.zakshin-logo-title {
+  font-weight: 950;
+  font-size: 1.6rem;
+  letter-spacing: -0.06em;
   background: linear-gradient(
     90deg,
     color-mix(in srgb, var(--accent) 85%, #7c3aed 15%),
@@ -712,9 +832,16 @@ kbd {
   background-clip: text;
   color: transparent;
   text-shadow:
-    0 0 22px color-mix(in srgb, var(--accent) 45%, transparent),
-    0 10px 40px var(--shadow);
-  user-select: none;
+    0 0 26px color-mix(in srgb, var(--accent) 40%, transparent),
+    0 14px 60px var(--shadow);
+}
+
+.zakshin-logo-sub {
+  margin-top: 8px;
+  font-weight: 750;
+  font-size: 0.9rem;
+  color: var(--muted);
+  letter-spacing: -0.02em;
 }
 
 .muted-note {
