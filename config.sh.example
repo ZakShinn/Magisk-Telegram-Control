@@ -17,10 +17,3 @@ TELEGRAM_CHAT_ID=""
 # HOTSPOT_SSID="MyHotspot"
 # HOTSPOT_PASS="ban_mat_khau"
 
-# TTL tether (/ttl_on): cùng hook module NFQTTL (nfqttli/nfqttlo) nhưng dùng TTL/HL kernel, không nhị phân nfqttl
-# TETHER_MODDIR=/data/adb/modules/your_module   # tuỳ chọn, tương thích MODDIR (bot không gọi nfqttl)
-# TETHER_TTL_VALUE=64
-# TETHER_TTL_DROP_WAIT=30
-# TETHER_TTL_POST_DROP_SLEEP=0
-# TETHER_TTL_OUT_IFACE=rmnet_data0
-

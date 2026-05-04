@@ -83,12 +83,38 @@ get_nettype() {
   COMBINED="$REG
 $TEL"
   DATA_NUM="$(echo "$REG" | grep -oE 'mDataNetworkType=[0-9]+' | head -n1 | cut -d= -f2)"
+  ntu="$(echo "$NETTYPE_RAW" | tr '[:lower:]' '[:upper:]')"
+  ntc="$(echo "$NETTYPE_RAW" | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')"
 
-  # gsm.network.type có NR / 5G / LTE,NR … thường đúng hơn mDataNetworkType=13 khi NSA.
-  case "$(echo "$NETTYPE_RAW" | tr '[:lower:]' '[:upper:]')" in *NR*|*5G*)
-    echo "5G"
+  # NSA: prop có cả LTE và NR (vd. LTE,NR / NR,LTE).
+  case "$ntc" in
+    *LTE*NR*|*NR*LTE*)
+      echo "LTE+NR (NSA)"
+      return
+      ;;
+  esac
+
+  # NSA: dump có EN-DC/ENDC kèm cell NR.
+  if echo "$COMBINED" | grep -qiE 'EN-DC|ENDC' \
+    && echo "$COMBINED" | grep -qiE 'CellIdentityNr|CellInfoNr|RAT_NR|SsRsrp|NrArfcn'; then
+    echo "LTE+NR (NSA)"
     return
-    ;;
+  fi
+
+  # NR/5G thuần trên prop → thường là SA (không còn nhánh LTE+NR phía trên).
+  case "$ntc" in
+    NR|NR_SA|5G|5G_SA|SA|SA_NR)
+      echo "5G (SA)"
+      return
+      ;;
+  esac
+
+  # gsm.network.type có NR / 5G (chuỗi phức tạp hơn token thuần).
+  case "$ntu" in
+    *NR*|*5G*)
+      echo "5G"
+      return
+      ;;
   esac
 
   if [ "$DATA_NUM" = "20" ]; then
@@ -105,7 +131,7 @@ $TEL"
     rat="$(rat_num_to_name "$DATA_NUM")"
     if [ "$rat" = "LTE" ]; then
       if echo "$COMBINED" | grep -qiE 'CellIdentityNr|CellInfoNr|PUBLIC_NR|TYPE_NR|EN-DC|ENDC|NETWORK_TYPE_NR|PHY.*[=: ]NR|RAT_NR|SsRsrp'; then
-        echo "5G"
+        echo "LTE+NR (NSA)"
         return
       fi
     fi
@@ -129,9 +155,31 @@ $TEL"
   fi
 }
 
-# Giữ tên hàm cho status/signal; chỉ trả đúng một nhãn RAT (không ghép thêm mô tả loại khác).
 get_nettype_with_desc() {
-  get_nettype
+  base="$(get_nettype)"
+  case "$base" in
+    "5G (SA)")
+      echo "5G (SA) – 5G độc lập (Standalone)"
+      ;;
+    "LTE+NR (NSA)")
+      echo "LTE+NR (NSA) – 4G LTE + 5G (Non-Standalone)"
+      ;;
+    "5G")
+      echo "5G – mạng 5G (kiểu kết nối không rõ)"
+      ;;
+    "LTE")
+      echo "LTE – 4G LTE"
+      ;;
+    "3G")
+      echo "3G – UMTS/HSPA (3G)"
+      ;;
+    "2G")
+      echo "2G – GSM/EDGE (2G)"
+      ;;
+    *)
+      echo "$base"
+      ;;
+  esac
 }
 
 get_operator_name() {

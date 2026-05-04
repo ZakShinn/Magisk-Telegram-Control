@@ -13,16 +13,13 @@ handle_help() {
 /battery           - Thông tin pin hiện tại
 /datausage     - Dung lượng data đã dùng
 
-/loop_on &lt;phút&gt; &lt;lệnh&gt;  - Hẹn giờ: sau N phút chạy lệnh một lần
-/loop_off       - Hủy mọi hẹn giờ đang chờ (sleep nền)
+/loop_on &lt;phút&gt; &lt;lệnh&gt;  - Lặp: mỗi N phút chạy lệnh một lần
+/loop_off       - Dừng mọi vòng lặp nền (/loop_on)
 
 /rndis_on        - Bật RNDIS (USB tether)
 /rndis_off        - Tắt RNDIS (USB tether)
-/hotspot_on [SSID MậtKhẩu]  - Bật hotspot (mặc định từ config hoặc Hotspot/12345678)
+/hotspot_on [SSID MậtKhẩu]  - Bật hotspot (mặc định từ config)
 /hotspot_off  - Tắt Hotspot (Phát wifi)
-
-/ttl_on       - TTL tether (giống module NFQTTL: DROP 30s → mangle nfqttli/nfqttlo; không cần nfqttl)
-/ttl_off      - Gỡ nfqttli/nfqttlo (TTL/HL do bot, hoặc NFQUEUE cũ)
 
 /shutdown     - Tắt máy
 /restart            - Khởi động lại
@@ -208,23 +205,6 @@ handle_battery() {
   send_code "$info"
 }
 
-handle_ttl_on() {
-  send_code "⏳ /ttl_on: giống service.sh module NFQTTL (FORWARD DROP ~30s → nfqttli/nfqttlo với TTL/HL, không chạy nhị phân nfqttl). Đừng spam..."
-  if ttl_on_run_script; then
-    send_code "✅ /ttl_on hoàn tất (PREROUTING/OUTPUT + IPv6 POSTROUTING; chain nfqttli/nfqttlo = TTL/HL)."
-  else
-    reason="$(escape_html "${TTL_ON_LAST_ERROR:-không xác định}")"
-    send_code "❌ /ttl_on thất bại: ${reason}
-
-<i>Gợi ý: uid 0; kernel cần target TTL/HL; thử <code>iptables -t mangle -A OUTPUT -j TTL --ttl-set 64</code>; tuỳ chọn <code>TETHER_TTL_OUT_IFACE</code>, <code>TETHER_TTL_POST_DROP_SLEEP</code>.</i>"
-  fi
-}
-
-handle_ttl_off() {
-  ttl_tether_clear 2>/dev/null || true
-  send_code "ℹ️ /ttl_off: đã gỡ nfqttli/nfqttlo (TTL/HL hoặc NFQUEUE cũ) và chuỗi tg_ttl_* nếu còn."
-}
-
 # Chỉ cho phép ký tự an toàn cho đích ping (tránh chèn lệnh).
 _ping_target_valid() {
   t="$1"
@@ -339,14 +319,6 @@ dispatch_command() {
     "/hotspot_off")
       notify_command_received "$TEXT"
       handle_hotspot_off
-      ;;
-    "/ttl_on")
-      notify_command_received "$TEXT"
-      handle_ttl_on
-      ;;
-    "/ttl_off")
-      notify_command_received "$TEXT"
-      handle_ttl_off
       ;;
     "/loop_off")
       notify_command_received "$TEXT"

@@ -16,8 +16,6 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/telephony.sh"
 # shellcheck source=/dev/null
-. "${SCRIPT_DIR}/lib/ttl_tether.sh"
-# shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/usb_wifi.sh"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/netstats.sh"
