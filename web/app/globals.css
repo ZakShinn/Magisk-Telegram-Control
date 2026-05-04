@@ -667,6 +667,22 @@ kbd {
   font-size: 0.88rem;
 }
 
+.donate-logo-image-wrap {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.donate-logo-image {
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  border-radius: 14px;
+  box-shadow: 0 14px 48px var(--shadow);
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+}
+
 .links-row a {
   color: var(--accent);
   font-weight: 600;
@@ -675,40 +691,6 @@ kbd {
 
 .links-row a:hover {
   text-decoration: underline;
-}
-
-.donate-logo-row {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.donate-logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text);
-  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  background: radial-gradient(
-      120% 120% at 20% 15%,
-      color-mix(in srgb, var(--accent) 25%, transparent),
-      transparent 55%
-    ),
-    linear-gradient(180deg, var(--card), color-mix(in srgb, var(--card) 75%, transparent));
-  box-shadow: 0 16px 44px var(--shadow);
-}
-
-.donate-logo--paypal {
-  color: color-mix(in srgb, var(--accent) 85%, #1e4bd1 15%);
-}
-
-.donate-logo--bank {
-  color: color-mix(in srgb, var(--accent) 55%, #2bb673 45%);
 }
 
 .muted-note {

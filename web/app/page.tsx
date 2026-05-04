@@ -347,6 +347,17 @@ export default function HomePage() {
               </div>
             </div>
 
+            <div className="donate-logo-image-wrap" aria-hidden="true">
+              <Image
+                className="donate-logo-image"
+                src="/logo.png"
+                alt=""
+                width={220}
+                height={220}
+                loading="lazy"
+              />
+            </div>
+
             <div className="links-row">
               <a
                 href={CONTACT_FACEBOOK_URL}
@@ -355,53 +366,6 @@ export default function HomePage() {
               >
                 {t.contactFacebook}
               </a>
-              <a
-                href={DONATE_PAYPAL_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t.donatePaypal}
-              </a>
-            </div>
-
-            <div className="donate-logo-row" aria-hidden="true">
-              <span className="donate-logo donate-logo--bank" title="VietQR">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-                  <path
-                    d="M4.5 7.5A3 3 0 0 1 7.5 4.5h9A3 3 0 0 1 19.5 7.5v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                  <path
-                    d="M8 9.5h3.2c1.3 0 2.1.8 2.1 1.9 0 1.2-.9 1.9-2.2 1.9H8V9.5Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M13.4 9.5H16v6"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-              <span className="donate-logo donate-logo--paypal" title="PayPal">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-                  <path
-                    d="M7.2 18.5 9.1 5.9c.1-.8.8-1.4 1.6-1.4h5.3c3 0 4.7 1.6 4.2 4.4-.5 2.7-2.6 4.3-5.7 4.3h-2.4l-.7 5.3H7.2Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M10.6 19.5 12 9.5h3.3c2.3 0 3.7 1.1 3.3 3.2-.4 2-2 3-4.2 3H13l-.5 3.8h-1.9Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
             </div>
 
             <p className="footer-tagline">{t.partnerFooter}</p>
