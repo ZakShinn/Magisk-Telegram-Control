@@ -616,7 +616,7 @@ kbd {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .donate-qr-label {
@@ -665,12 +665,24 @@ kbd {
   gap: 14px;
   margin-top: 14px;
   font-size: 0.88rem;
+  justify-content: center;
+  text-align: center;
 }
 
 .donate-logo-image-wrap {
   margin-top: 14px;
   display: flex;
   justify-content: center;
+}
+
+.donate-logo-image-wrap a {
+  display: inline-flex;
+  border-radius: 14px;
+}
+
+.donate-logo-image-wrap a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .donate-logo-image {

@@ -11,11 +11,10 @@ export const STR = {
     themeGroupAria: "Chế độ giao diện",
     langGroupAria: "Ngôn ngữ hiển thị",
     formSectionTitle: "Cấu hình & tải ZIP",
-    donateBankLabel: "Ngân hàng (VietQR)",
+    donateBankLabel: "Ngân hàng",
     donateQrAlt:
       "Mã QR VietQR ủng hộ — MB Bank 0968884946 — Võ Hoàng Hải Nghĩa",
     donatePaypalLabel: "PayPal",
-    donatePaypalHint: "Nhấn link để mở PayPal",
     title: "TelegramControl · Builder ZIP module",
     lead:
       "Nhập Bot Token và Chat ID để tạo file ZIP module Magisk đã nhúng config.sh. Tải về và flash trong Magisk như module thông thường.",
@@ -51,8 +50,6 @@ export const STR = {
     donateBankName: "Ngân hàng MB",
     contactFacebook: "Liên hệ · Báo lỗi (Facebook)",
     donatePaypal: "Donate · PayPal",
-    partnerFooter:
-      "TelegramControl · Module Magisk điều khiển thiết bị Android qua Telegram.",
   },
   en: {
     skipToContent: "Skip to content",
@@ -64,11 +61,10 @@ export const STR = {
     themeGroupAria: "Theme",
     langGroupAria: "Language",
     formSectionTitle: "Configure & download ZIP",
-    donateBankLabel: "Bank (VietQR)",
+    donateBankLabel: "Bank",
     donateQrAlt:
       "VietQR donate — MB Bank 0968884946 — Vo Hoang Hai Nghia",
     donatePaypalLabel: "PayPal",
-    donatePaypalHint: "Click the link to open PayPal",
     title: "TelegramControl · Magisk ZIP builder",
     lead:
       "Enter your Bot Token and Chat ID to build a Magisk module ZIP with embedded config.sh. Download and flash in Magisk as usual.",
@@ -104,8 +100,6 @@ export const STR = {
     donateBankName: "MB Bank",
     contactFacebook: "Contact · Report issues (Facebook)",
     donatePaypal: "Donate · PayPal",
-    partnerFooter:
-      "TelegramControl · Magisk module for Android control via Telegram.",
   },
 } as const;
 

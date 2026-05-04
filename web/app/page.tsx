@@ -341,21 +341,27 @@ export default function HomePage() {
                         paypal.me/Zakshin
                       </a>
                     </div>
-                    <div className="bank">{t.donatePaypalHint}</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="donate-logo-image-wrap" aria-hidden="true">
-              <Image
-                className="donate-logo-image"
-                src="/logo.png"
-                alt=""
-                width={220}
-                height={220}
-                loading="lazy"
-              />
+              <a
+                href={CONTACT_FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t.contactFacebook}
+              >
+                <Image
+                  className="donate-logo-image"
+                  src="/logo.png"
+                  alt=""
+                  width={220}
+                  height={220}
+                  loading="lazy"
+                />
+              </a>
             </div>
 
             <div className="links-row">
@@ -367,8 +373,6 @@ export default function HomePage() {
                 {t.contactFacebook}
               </a>
             </div>
-
-            <p className="footer-tagline">{t.partnerFooter}</p>
           </aside>
         </section>
       </main>
