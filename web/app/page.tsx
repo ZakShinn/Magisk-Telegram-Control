@@ -7,6 +7,7 @@ import { pick, type Lang } from "./strings";
 const DONATE_STK = "0968884946";
 const DONATE_VIETQR_URL =
   "https://img.vietqr.io/image/MB-0968884946-compact.png?addTag=ZakshinTools";
+const DONATE_PAYPAL_URL = "https://paypal.me/Zakshin";
 const CONTACT_FACEBOOK_URL =
   "https://www.facebook.com/profile.php?id=100006985387032";
 
@@ -331,6 +332,13 @@ export default function HomePage() {
                 rel="noopener noreferrer"
               >
                 {t.contactFacebook}
+              </a>
+              <a
+                href={DONATE_PAYPAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t.donatePaypal}
               </a>
             </div>
 

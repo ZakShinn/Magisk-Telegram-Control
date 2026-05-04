@@ -51,6 +51,11 @@ Sau khi cài, module chỉ nhận lệnh từ **Chat ID** bạn đã nhúng vào
 
 - Không công khai **Bot token** hoặc `config.sh`.
 
+### Ủng hộ / Donate
+
+- MB Bank: **0968884946**
+- PayPal: **paypal.me/Zakshin**
+
 
 ---
 
@@ -100,4 +105,9 @@ After install, the module only accepts commands from the **Chat ID** embedded in
 ### Security
 
 - Never publish your **bot token** or `config.sh`.
+
+### Donate
+
+- MB Bank: **0968884946**
+- PayPal: **paypal.me/Zakshin**
 

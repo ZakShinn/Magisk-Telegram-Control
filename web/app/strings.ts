@@ -47,6 +47,7 @@ export const STR = {
     donateRecipient: "Võ Hoàng Hải Nghĩa",
     donateBankName: "Ngân hàng MB",
     contactFacebook: "Liên hệ · Báo lỗi (Facebook)",
+    donatePaypal: "Donate · PayPal",
     partnerFooter:
       "TelegramControl · Module Magisk điều khiển thiết bị Android qua Telegram.",
   },
@@ -96,6 +97,7 @@ export const STR = {
     donateRecipient: "Võ Hoàng Hải Nghĩa",
     donateBankName: "MB Bank",
     contactFacebook: "Contact · Report issues (Facebook)",
+    donatePaypal: "Donate · PayPal",
     partnerFooter:
       "TelegramControl · Magisk module for Android control via Telegram.",
   },
