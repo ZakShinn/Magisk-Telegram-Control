@@ -241,6 +241,51 @@ body {
   letter-spacing: -0.02em;
 }
 
+.logo-tile {
+  width: 220px;
+  height: 220px;
+  margin: 14px auto 16px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: radial-gradient(
+      120% 120% at 20% 10%,
+      color-mix(in srgb, var(--accent) 24%, transparent),
+      transparent 62%
+    ),
+    linear-gradient(180deg, var(--card), color-mix(in srgb, var(--card) 70%, transparent));
+  box-shadow: 0 18px 60px var(--shadow);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.logo-tile::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.12),
+    transparent
+  );
+  transform: translateX(-60%) rotate(12deg);
+  transition: transform 520ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  pointer-events: none;
+}
+
+.logo-tile:hover::after {
+  transform: translateX(60%) rotate(12deg);
+}
+
+.logo-tile-img {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 40px var(--shadow));
+}
+
 .hero-eyebrow {
   margin: 0 0 12px;
   padding-left: 12px;
@@ -791,57 +836,6 @@ kbd {
 
 .donate-logo--bank {
   color: color-mix(in srgb, var(--accent) 55%, #2bb673 45%);
-}
-
-.zakshin-logo {
-  margin-top: 12px;
-  width: 220px;
-  height: 220px;
-  border-radius: 16px;
-  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  background: radial-gradient(
-      110% 110% at 20% 15%,
-      color-mix(in srgb, var(--accent) 24%, transparent),
-      transparent 58%
-    ),
-    radial-gradient(90% 90% at 85% 18%, rgba(124, 58, 237, 0.18), transparent 55%),
-    linear-gradient(180deg, var(--card), color-mix(in srgb, var(--card) 70%, transparent));
-  box-shadow: 0 18px 60px var(--shadow);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.zakshin-logo-inner {
-  text-align: center;
-  padding: 18px;
-}
-
-.zakshin-logo-title {
-  font-weight: 950;
-  font-size: 1.6rem;
-  letter-spacing: -0.06em;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--accent) 85%, #7c3aed 15%),
-    color-mix(in srgb, var(--accent) 70%, #06b6d4 30%),
-    color-mix(in srgb, var(--accent) 80%, #f59e0b 20%)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow:
-    0 0 26px color-mix(in srgb, var(--accent) 40%, transparent),
-    0 14px 60px var(--shadow);
-}
-
-.zakshin-logo-sub {
-  margin-top: 8px;
-  font-weight: 750;
-  font-size: 0.9rem;
-  color: var(--muted);
-  letter-spacing: -0.02em;
 }
 
 .muted-note {

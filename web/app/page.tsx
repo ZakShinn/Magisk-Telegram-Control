@@ -304,6 +304,16 @@ export default function HomePage() {
 
           <aside className="card donate-card" aria-label={t.donateTitle}>
             <h2 className="donate-title">{t.donateTitle}</h2>
+            <div className="logo-tile" aria-hidden="false">
+              <Image
+                className="logo-tile-img"
+                src="/logo.png"
+                alt={t.logoTileAlt}
+                width={220}
+                height={220}
+                priority={false}
+              />
+            </div>
             <div className="donate-qr-wrap">
               <div className="donate-qr-stack">
                 <div className="donate-qr-block">
@@ -419,12 +429,6 @@ export default function HomePage() {
                   />
                 </svg>
               </span>
-            </div>
-            <div className="zakshin-logo" aria-hidden="true">
-              <div className="zakshin-logo-inner">
-                <div className="zakshin-logo-title">Zakshin</div>
-                <div className="zakshin-logo-sub">TelegramControl</div>
-              </div>
             </div>
 
             <p className="footer-tagline">{t.partnerFooter}</p>

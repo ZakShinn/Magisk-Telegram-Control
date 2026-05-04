@@ -11,6 +11,7 @@ export const STR = {
     themeGroupAria: "Chế độ giao diện",
     langGroupAria: "Ngôn ngữ hiển thị",
     formSectionTitle: "Cấu hình & tải ZIP",
+    logoTileAlt: "Logo TelegramControl",
     donateBankLabel: "Ngân hàng (VietQR)",
     donateQrAlt:
       "Mã QR VietQR ủng hộ — MB Bank 0968884946 — Võ Hoàng Hải Nghĩa",
@@ -66,6 +67,7 @@ export const STR = {
     themeGroupAria: "Theme",
     langGroupAria: "Language",
     formSectionTitle: "Configure & download ZIP",
+    logoTileAlt: "TelegramControl logo",
     donateBankLabel: "Bank (VietQR)",
     donateQrAlt:
       "VietQR donate — MB Bank 0968884946 — Vo Hoang Hai Nghia",
