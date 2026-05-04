@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { pick, type Lang } from "./strings";
-import logo from "../logo.png";
 
 const DONATE_STK = "0968884946";
 const DONATE_VIETQR_URL =
@@ -115,7 +114,7 @@ export default function HomePage() {
           <span className="brand-mark" aria-hidden="true">
             <Image
               className="brand-logo"
-              src={logo}
+              src="/logo.png"
               alt=""
               width={44}
               height={44}
@@ -128,37 +127,55 @@ export default function HomePage() {
           </span>
         </a>
         <nav className="masthead-nav" aria-label={t.mastheadNavAria}>
-          <div className="toggle-group" role="group" aria-label={t.themeGroupAria}>
-            <button
-              type="button"
-              className={theme === "dark" ? "active" : ""}
-              onClick={() => setTheme("dark")}
-            >
-              {t.themeDark}
-            </button>
-            <button
-              type="button"
-              className={theme === "light" ? "active" : ""}
-              onClick={() => setTheme("light")}
-            >
-              {t.themeLight}
-            </button>
-          </div>
-          <div className="toggle-group" role="group" aria-label={t.langGroupAria}>
-            <button
-              type="button"
-              className={lang === "vi" ? "active" : ""}
-              onClick={() => setLang("vi")}
-            >
-              {t.langVi}
-            </button>
-            <button
-              type="button"
-              className={lang === "en" ? "active" : ""}
-              onClick={() => setLang("en")}
-            >
-              {t.langEn}
-            </button>
+          <div className="segmented-pair">
+            <div className="segmented" role="group" aria-label={t.themeGroupAria}>
+              <span
+                className="segmented-indicator"
+                aria-hidden="true"
+                data-pos={theme}
+              />
+              <button
+                type="button"
+                className={theme === "dark" ? "active" : ""}
+                onClick={() => setTheme("dark")}
+              >
+                <span className="seg-ico" aria-hidden="true">
+                  ⛧
+                </span>
+                {t.themeDark}
+              </button>
+              <button
+                type="button"
+                className={theme === "light" ? "active" : ""}
+                onClick={() => setTheme("light")}
+              >
+                <span className="seg-ico" aria-hidden="true">
+                  ✧
+                </span>
+                {t.themeLight}
+              </button>
+            </div>
+            <div className="segmented" role="group" aria-label={t.langGroupAria}>
+              <span
+                className="segmented-indicator"
+                aria-hidden="true"
+                data-pos={lang}
+              />
+              <button
+                type="button"
+                className={lang === "vi" ? "active" : ""}
+                onClick={() => setLang("vi")}
+              >
+                {t.langVi}
+              </button>
+              <button
+                type="button"
+                className={lang === "en" ? "active" : ""}
+                onClick={() => setLang("en")}
+              >
+                {t.langEn}
+              </button>
+            </div>
           </div>
         </nav>
       </header>

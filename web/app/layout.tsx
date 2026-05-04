@@ -15,6 +15,10 @@ export const metadata: Metadata = {
     "Tạo ZIP module Magisk nhúng Bot Token và Chat ID (config.sh), flash trên Android để điều khiển máy qua Telegram. · Build a Magisk ZIP with embedded Telegram bot config for remote phone control.",
   applicationName: "TelegramControl",
   authors: [{ name: "Zakshin (Hải Nghĩa)" }],
+  icons: {
+    icon: [{ url: "/logo.png" }],
+    apple: [{ url: "/logo.png" }],
+  },
   keywords: [
     "Magisk",
     "Magisk module",
@@ -75,8 +79,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0c0f14" },
-    { media: "(prefers-color-scheme: light)", color: "#eef2f9" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0508" },
+    { media: "(prefers-color-scheme: light)", color: "#f6fbff" },
   ],
 };
 

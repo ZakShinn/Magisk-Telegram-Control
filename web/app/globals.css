@@ -1,40 +1,48 @@
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0c0f14;
-  --bg-gradient-a: #1a2440;
-  --bg-gradient-b: #162830;
-  --card: #151a22;
-  --border: #263042;
-  --text: #e8edf5;
-  --muted: #8b97ab;
-  --accent: #5b9cfa;
-  --accent-dim: #3d6fb8;
-  --btn-text: #0b1220;
-  --btn-grad-top: #a8cbff;
+  --bg: #0a0508;
+  --bg-gradient-a: rgba(255, 20, 87, 0.24);
+  --bg-gradient-b: rgba(168, 85, 247, 0.18);
+  --bg-gradient-c: rgba(255, 150, 60, 0.12);
+  --card: rgba(18, 7, 14, 0.78);
+  --border: rgba(255, 78, 135, 0.16);
+  --text: #ffe9f0;
+  --muted: rgba(255, 233, 240, 0.66);
+  --accent: #ff2e6d;
+  --accent-dim: #c61b54;
+  --btn-text: #13040a;
+  --btn-grad-top: #ffb8cf;
   --err: #ff9db4;
-  --kbd-bg: rgba(0, 0, 0, 0.35);
-  --input-bg: rgba(0, 0, 0, 0.25);
-  --shadow: rgba(0, 0, 0, 0.35);
+  --kbd-bg: rgba(0, 0, 0, 0.38);
+  --input-bg: rgba(0, 0, 0, 0.32);
+  --shadow: rgba(0, 0, 0, 0.48);
+  --seg-bg: rgba(0, 0, 0, 0.28);
+  --seg-indicator: rgba(255, 46, 109, 0.22);
+  --seg-indicator-border: rgba(255, 46, 109, 0.35);
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #eef2f9;
-  --bg-gradient-a: #dce8ff;
-  --bg-gradient-b: #e8f4fc;
-  --card: #ffffff;
-  --border: #c9d6e8;
-  --text: #142032;
-  --muted: #4d5f78;
-  --accent: #2563eb;
-  --accent-dim: #1d4ed8;
+  --bg: #f6fbff;
+  --bg-gradient-a: rgba(56, 189, 248, 0.24);
+  --bg-gradient-b: rgba(99, 102, 241, 0.12);
+  --bg-gradient-c: rgba(250, 204, 21, 0.22);
+  --card: rgba(255, 255, 255, 0.82);
+  --border: rgba(56, 189, 248, 0.22);
+  --text: #0f172a;
+  --muted: rgba(15, 23, 42, 0.62);
+  --accent: #0ea5e9;
+  --accent-dim: #0284c7;
   --btn-text: #ffffff;
-  --btn-grad-top: #93c5fd;
+  --btn-grad-top: rgba(250, 204, 21, 0.88);
   --err: #dc2626;
-  --kbd-bg: rgba(0, 0, 0, 0.06);
-  --input-bg: rgba(255, 255, 255, 0.92);
-  --shadow: rgba(15, 23, 42, 0.12);
+  --kbd-bg: rgba(2, 6, 23, 0.06);
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --shadow: rgba(15, 23, 42, 0.1);
+  --seg-bg: rgba(255, 255, 255, 0.74);
+  --seg-indicator: rgba(56, 189, 248, 0.18);
+  --seg-indicator-border: rgba(56, 189, 248, 0.28);
 }
 
 * {
@@ -55,8 +63,10 @@ body {
     Arial,
     sans-serif;
   background:
-    radial-gradient(1200px 600px at 20% -10%, var(--bg-gradient-a) 0%, transparent 55%),
-    radial-gradient(900px 500px at 90% 10%, var(--bg-gradient-b) 0%, transparent 50%), var(--bg);
+    radial-gradient(900px 520px at 15% -10%, var(--bg-gradient-a) 0%, transparent 58%),
+    radial-gradient(820px 520px at 92% 12%, var(--bg-gradient-b) 0%, transparent 56%),
+    radial-gradient(760px 520px at 40% 110%, var(--bg-gradient-c) 0%, transparent 58%),
+    var(--bg);
   color: var(--text);
   transition:
     background 0.22s ease,
@@ -263,6 +273,89 @@ body {
 .toggle-group button.active {
   background: linear-gradient(180deg, var(--btn-grad-top), var(--accent));
   color: var(--btn-text);
+}
+
+.segmented-pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.segmented {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
+  overflow: hidden;
+  background: var(--seg-bg);
+  box-shadow: 0 10px 34px var(--shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.segmented-indicator {
+  position: absolute;
+  inset: 3px;
+  width: calc(50% - 3px);
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--btn-grad-top) 62%, transparent),
+    var(--seg-indicator)
+  );
+  border: 1px solid var(--seg-indicator-border);
+  box-shadow: 0 10px 30px var(--shadow);
+  transform: translateX(0%);
+  transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.2, 1);
+  pointer-events: none;
+}
+
+.segmented-indicator[data-pos="light"],
+.segmented-indicator[data-pos="en"] {
+  transform: translateX(100%);
+}
+
+.segmented button {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  width: auto;
+  padding: 8px 14px;
+  border-radius: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  box-shadow: none;
+  min-height: 40px;
+  -webkit-tap-highlight-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: 0.01em;
+}
+
+.segmented button:hover:not(:disabled) {
+  color: color-mix(in srgb, var(--text) 92%, var(--accent));
+}
+
+.segmented button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.segmented button.active {
+  color: var(--text);
+}
+
+.segmented .seg-ico {
+  font-size: 0.9em;
+  opacity: 0.92;
 }
 
 .card {
@@ -576,6 +669,20 @@ kbd {
 
   .toggle-group button {
     flex: 1;
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+
+  .segmented-pair {
+    width: 100%;
+  }
+
+  .segmented {
+    width: 100%;
+  }
+
+  .segmented button {
     min-height: 44px;
     padding: 10px 12px;
     font-size: 0.8rem;
