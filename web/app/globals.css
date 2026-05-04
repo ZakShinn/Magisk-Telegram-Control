@@ -155,17 +155,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, var(--btn-grad-top), var(--accent));
-  box-shadow:
-    0 4px 18px color-mix(in srgb, var(--accent) 28%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  box-shadow: 0 8px 22px var(--shadow);
 }
 
-.brand-mark-text {
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: var(--btn-text);
+.brand-logo {
+  display: block;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
 }
 
 .brand-text {

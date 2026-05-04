@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { pick, type Lang } from "./strings";
+import logo from "../logo.png";
 
 const DONATE_STK = "0968884946";
 const DONATE_VIETQR_URL =
@@ -111,7 +113,14 @@ export default function HomePage() {
       <header className="site-header">
         <a href="/" className="site-brand" aria-label={t.brandHomeAria}>
           <span className="brand-mark" aria-hidden="true">
-            <span className="brand-mark-text">TC</span>
+            <Image
+              className="brand-logo"
+              src={logo}
+              alt=""
+              width={44}
+              height={44}
+              priority
+            />
           </span>
           <span className="brand-text">
             <span className="brand-name">{t.brandName}</span>
@@ -156,7 +165,7 @@ export default function HomePage() {
 
       <main id="main-content" className="main-content" tabIndex={-1}>
         <section className="hero" aria-labelledby="page-title">
-          <p className="hero-eyebrow">{t.heroEyebrow}</p>
+          {t.heroEyebrow ? <p className="hero-eyebrow">{t.heroEyebrow}</p> : null}
           <h1 id="page-title">{t.title}</h1>
           <p className="lead">{t.lead}</p>
         </section>

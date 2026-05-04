@@ -6,8 +6,7 @@ export const STR = {
     brandName: "TelegramControl",
     brandHomeAria: "TelegramControl — về trang chủ",
     siteKeywordsLine: "Magisk · Telegram · Android",
-    heroEyebrow:
-      "Module Magisk nhúng Telegram bot · điều khiển thiết bị Android từ xa",
+    heroEyebrow: "",
     mastheadNavAria: "Giao diện và ngôn ngữ",
     themeGroupAria: "Chế độ giao diện",
     langGroupAria: "Ngôn ngữ hiển thị",
@@ -56,8 +55,7 @@ export const STR = {
     brandName: "TelegramControl",
     brandHomeAria: "TelegramControl — home",
     siteKeywordsLine: "Magisk · Telegram · Android",
-    heroEyebrow:
-      "Magisk module with Telegram bot · remote control for Android devices",
+    heroEyebrow: "",
     mastheadNavAria: "Appearance and language",
     themeGroupAria: "Theme",
     langGroupAria: "Language",

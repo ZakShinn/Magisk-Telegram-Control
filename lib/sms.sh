@@ -2,8 +2,9 @@
 # Đọc SMS hộp thư đến qua lệnh content (tương đương adb shell content query --uri content://sms/inbox).
 
 SMS_INBOX_URI="content://sms/inbox"
-SMS_SHOW_COUNT=3
+SMS_SHOW_COUNT=1
 SMS_BODY_MAX=1200
+SMS_SHOW_MAX=50
 
 _sms_content_bin() {
   if command -v content >/dev/null 2>&1; then
@@ -50,6 +51,27 @@ handle_sms() {
     return 1
   fi
 
+  rest="$(echo "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+  SMS_SHOW_COUNT=1
+  if [ -n "$rest" ]; then
+    case "$rest" in
+      *[!0-9]*)
+        send_code "❌ Số lượng SMS không hợp lệ (chỉ dùng số nguyên dương, ví dụ <code>/sms 5</code>)."
+        return 1
+        ;;
+      0)
+        send_code "❌ Số lượng phải ≥ 1."
+        return 1
+        ;;
+      *)
+        SMS_SHOW_COUNT="$rest"
+        if [ "$SMS_SHOW_COUNT" -gt "$SMS_SHOW_MAX" ] 2>/dev/null; then
+          SMS_SHOW_COUNT="$SMS_SHOW_MAX"
+        fi
+        ;;
+    esac
+  fi
+
   raw="$(sms_query_inbox_raw)"
   if [ -z "$raw" ]; then
     send_code "❌ Không đọc được SMS (quyền <code>READ_SMS</code> / ROM, hoặc hộp thư trống)."
@@ -65,7 +87,7 @@ handle_sms() {
   ts="$(date '+%H:%M:%S · %d/%m/%Y' 2>/dev/null || echo '—')"
   ts_esc="$(escape_html "$ts")"
   out="<b>📩 ${SMS_SHOW_COUNT} SMS gần nhất (inbox)</b>
-<i>${ts_esc}</i> · <code>content query --uri content://sms/inbox</code>
+<i>${ts_esc}</i>
 ━━━━━━━━━━━━━━━━
 "
 

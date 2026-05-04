@@ -6,30 +6,40 @@ handle_help() {
 <b>Lệnh hỗ trợ:</b>
 
 /help                 - Hiển thị danh sách lệnh
+/dev                   - Lệnh thử nghiệm (wifi/bt/loop)
 /status             - Hiển thị thông tin cơ bản của thiết bị
 /signal              - Báo cáo mạng: RAT, băng tần, RSRP/RSRQ/SINR, roaming
 /ip                      - IPv4 / IPv6 cục bộ + WAN public
 /ping [đích]     - Ping (mặc định 1.1.1.1) · vd: <code>/ping 8.8.8.8</code>
 /battery           - Thông tin pin hiện tại
 /datausage     - Dung lượng data đã dùng
-/sms               - 3 SMS gần nhất (inbox, qua lệnh <code>content query</code>)
-
-/loop_on &lt;phút&gt; &lt;lệnh&gt;  - Lặp: mỗi N phút chạy lệnh một lần
-/loop_off       - Dừng mọi vòng lặp nền (/loop_on)
+/sms [số]          - SMS gần nhất trong inbox (mặc định 1; ví dụ <code>/sms 5</code>)
 
 /rndis_on        - Bật RNDIS (USB tether)
 /rndis_off        - Tắt RNDIS (USB tether)
 /hotspot_on [SSID MậtKhẩu]  - Bật hotspot (mặc định từ config)
 /hotspot_off  - Tắt Hotspot (Phát wifi)
 
+/shutdown     - Tắt máy
+/restart            - Khởi động lại
+<i>Không được spam /shutdown và /restart vì sẽ gây tình trạng tắt và khởi động liên tục do tồn tại yêu cầu chưa được thực hiện.</i>
+EOF
+)"
+  send_code "$msg"
+}
+
+handle_dev() {
+  msg="$(cat <<'EOF'
+<b>Lệnh thử nghiệm (/dev):</b>
+<i>Các tính năng đang thử nghiệm, có thể đổi hành vi hoặc không hoạt động tùy ROM/quyền.</i>
+
 /wifi_on       - Bật Wi‑Fi
 /wifi_off      - Tắt Wi‑Fi
 /bt_on         - Bật Bluetooth
 /bt_off        - Tắt Bluetooth
 
-/shutdown     - Tắt máy
-/restart            - Khởi động lại
-<i>Không được spam /shutdown và /restart vì sẽ gây tình trạng tắt và khởi động liên tục do tồn tại yêu cầu chưa được thực hiện.</i>
+/loop_on &lt;phút&gt; &lt;lệnh&gt;  - Lặp: mỗi N phút chạy lệnh một lần
+/loop_off       - Dừng mọi vòng lặp nền (/loop_on)
 EOF
 )"
   send_code "$msg"
@@ -266,6 +276,10 @@ dispatch_command() {
       notify_command_received "$TEXT"
       handle_help
       ;;
+    "/dev")
+      notify_command_received "$TEXT"
+      handle_dev
+      ;;
     "/start")
       notify_command_received "$TEXT"
       handle_help
@@ -304,9 +318,11 @@ dispatch_command() {
       notify_command_received "$TEXT"
       handle_datausage
       ;;
-    "/sms")
+    /sms*)
       notify_command_received "$TEXT"
-      handle_sms
+      rest="${TEXT#/sms}"
+      rest="$(echo "$rest" | sed 's/^[[:space:]]*//')"
+      handle_sms "$rest"
       ;;
     "/rndis_on")
       notify_command_received "$TEXT"
