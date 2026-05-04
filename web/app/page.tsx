@@ -307,7 +307,6 @@ export default function HomePage() {
             <div className="donate-qr-wrap">
               <div className="donate-qr-stack">
                 <div className="donate-qr-block">
-                  <div className="donate-qr-label">{t.donateBankLabel}</div>
                   <img
                     className="donate-qr"
                     src={DONATE_VIETQR_URL}
