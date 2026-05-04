@@ -60,7 +60,7 @@ export const STR = {
     mastheadNavAria: "Appearance and language",
     themeGroupAria: "Theme",
     langGroupAria: "Language",
-    formSectionTitle: "Configure & download ZIP",
+    formSectionTitle: "Configure and Download Magisk Module",
     donateBankLabel: "Bank",
     donateQrAlt:
       "VietQR donate — MB Bank 0968884946 — Vo Hoang Hai Nghia",
