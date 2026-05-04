@@ -61,6 +61,21 @@ Tránh spam `/shutdown` và `/restart` vì lệnh có thể xếp hàng và gây
 - **`web/`**: trình tạo ZIP (Next.js). Chạy local: `cd web && npm install && npm run dev`.
 - Build production: `cd web && npm run build` (có bước `prebuild` đồng bộ file module vào `web/module-files`).
 
+### Ngôn ngữ (web chọn VI/EN → tải đúng module)
+
+Web có 2 lựa chọn ngôn ngữ hiển thị: **Tiếng Việt (vi)** và **English (en)**. Khi bấm tải ZIP, web sẽ gửi `lang` lên API để server đóng gói đúng bộ file:
+
+- `lang=vi` → đóng gói từ `web/module-files-vi`
+- `lang=en` → đóng gói từ `web/module-files-en`
+- Nếu thiếu thư mục ngôn ngữ, hệ thống sẽ fallback về `web/module-files`
+
+Để ZIP tải về **chỉ chứa đúng ngôn ngữ bạn đã chuẩn bị**, hãy đặt file override theo cấu trúc module vào:
+
+- `module-overrides/vi/...`
+- `module-overrides/en/...`
+
+Trong bước build (`npm run build`), script `web/scripts/sync-module.mjs` sẽ copy module gốc sang `web/module-files-vi|en` rồi **ghi đè** bằng nội dung trong `module-overrides/<lang>/`.
+
 ---
 
 <a id="en"></a>
@@ -121,3 +136,18 @@ Avoid spamming `/shutdown` and `/restart` because queued commands can cause repe
 - **`service.sh`**, **`lib/*.sh`**: on-device module logic.
 - **`web/`**: ZIP builder (Next.js). Local dev: `cd web && npm install && npm run dev`.
 - Production build: `cd web && npm run build` (runs `prebuild` to sync module files into `web/module-files`).
+
+### Language (VI/EN selection → download language-only module)
+
+The website has 2 display languages: **Vietnamese (vi)** and **English (en)**. When downloading the ZIP, the UI sends `lang` to the API so the server packages the correct file set:
+
+- `lang=vi` → package from `web/module-files-vi`
+- `lang=en` → package from `web/module-files-en`
+- If a language folder is missing, it falls back to `web/module-files`
+
+To make the downloaded ZIP contain **only** your intended language variant, put your language-specific overrides (mirroring the module root layout) under:
+
+- `module-overrides/vi/...`
+- `module-overrides/en/...`
+
+During build (`npm run build`), `web/scripts/sync-module.mjs` copies the base module into `web/module-files-vi|en` and then **overrides** files from `module-overrides/<lang>/`.

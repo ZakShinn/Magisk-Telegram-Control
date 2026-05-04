@@ -72,6 +72,7 @@ export default function HomePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          lang,
           token: token.trim(),
           chatId: chatId.trim(),
           hotspotSsid: hotspotSsid.trim(),

@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
+const LANG_RE = /^(vi|en)$/;
 const TOKEN_RE = /^[0-9]+:[A-Za-z0-9_-]+$/;
 const CHAT_RE = /^-?[0-9]+$/;
 
@@ -32,6 +33,11 @@ export async function POST(req: Request) {
   } catch {
     return jsonBilingual(400, "JSON không hợp lệ.", "Invalid JSON body.");
   }
+
+  const lang =
+    typeof body === "object" && body !== null && "lang" in body
+      ? String((body as { lang?: unknown }).lang ?? "").trim()
+      : "";
 
   const anydeskAutoMedia =
     typeof body === "object" && body !== null && "anydeskAutoMedia" in body
@@ -108,7 +114,19 @@ export async function POST(req: Request) {
     );
   }
 
-  const root = path.join(process.cwd(), "module-files");
+  const rootDefault = path.join(process.cwd(), "module-files");
+  const rootLang =
+    LANG_RE.test(lang) ? path.join(process.cwd(), `module-files-${lang}`) : "";
+  const root = rootLang && fs.existsSync(rootLang) ? rootLang : rootDefault;
+
+  if (lang !== "" && !LANG_RE.test(lang)) {
+    return jsonBilingual(
+      400,
+      "Ngôn ngữ không hợp lệ (chỉ hỗ trợ vi/en).",
+      "Invalid language (supported: vi/en).",
+    );
+  }
+
   const needed = [
     "module.prop",
     "service.sh",

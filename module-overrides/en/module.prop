@@ -1,0 +1,7 @@
+id=TelegramControl
+name=Device control via Telegram
+version=3.0
+versionCode=3
+author=Zakshin (Hai Nghia)
+description=Control your Android device via a Telegram bot. If you find it useful, you can buy me a coffee: bank account 0968884946
+
