@@ -21,8 +21,8 @@ handle_help() {
 /hotspot_on [SSID MậtKhẩu]  - Bật hotspot (mặc định từ config hoặc Hotspot/12345678)
 /hotspot_off  - Tắt Hotspot (Phát wifi)
 
-/ttl_on       - Chạy script TTL/NFQUEUE (nfqttl + iptables; ~30s chờ + vòng nfqttl)
-/ttl_off      - Không thay đổi gì (giữ chỗ lệnh)
+/ttl_on       - Bật TTL tether (iptables mangle TTL/HL; có thể chờ ~30s FORWARD DROP)
+/ttl_off      - Gỡ rule TTL do bot gắn (POSTROUTING → tg_ttl_fix)
 
 /shutdown     - Tắt máy
 /restart            - Khởi động lại
@@ -53,7 +53,6 @@ handle_signal() {
   sinr="$(get_sinr_db_from_dump "$dump")"
   roaming="$(get_roaming_status_vi_from_dump "$dump")"
   meter="$(format_dbm_strength_meter "$dbm")"
-  rat_raw="$(get_voice_data_rat_lines_from_dump "$dump")"
 
   op_esc="$(escape_html "$operator")"
   net_esc="$(escape_html "$nettypedesc")"
@@ -71,18 +70,6 @@ handle_signal() {
     band_block="<code>$(escape_html "$bandinfo")</code>"
   else
     band_block="<i>Không đọc được băng tần từ modem (ROM/NSA hoặc chưa camp đủ)</i>"
-  fi
-
-  rat_block=""
-  if [ -n "$rat_raw" ]; then
-    rat_fmt="$(echo "$rat_raw" | while IFS= read -r L || [ -n "$L" ]; do
-      [ -z "$L" ] && continue
-      printf '%s\n' "• $(escape_html "$L")"
-    done)"
-    rat_block="<b>VoLTE · RAT dữ liệu</b>
-${rat_fmt}
-
-"
   fi
 
   meter_block=""
@@ -110,7 +97,7 @@ ${rat_fmt}
 <b>Nhà mạng</b>
 <code>${op_esc}</code>
 
-${rat_block}<b>Công nghệ truy cập</b>
+<b>Công nghệ truy cập</b>
 ${net_esc}
 
 <b>Băng tần</b>
@@ -123,7 +110,7 @@ ${band_block}
 ${meter_block}${extra_physics}<b>Chuyển vùng</b>
 ${roam_esc}
 
-<i>Tham khảo: modem, antenna và ROM quyết định độ chính xác; NSA có thể hiển thị LTE + NR.</i>"
+<i>Tham khảo: modem, antenna và ROM quyết định độ chính xác.</i>"
 
   send_code "$msg"
 }
@@ -222,16 +209,20 @@ handle_battery() {
 }
 
 handle_ttl_on() {
-  send_code "⏳ /ttl_on: DROP FORWARD 30s → nfqttl → NFQUEUE (6464). Có thể mất vài phút, đừng spam..."
+  send_code "⏳ /ttl_on: FORWARD DROP (mặc định 30s, có thể tắt bằng TETHER_TTL_DROP_WAIT=0) → iptables TTL + ip6tables HL. Đừng spam..."
   if ttl_on_run_script; then
-    send_code "✅ /ttl_on hoàn tất (nfqttl + iptables theo script)."
+    send_code "✅ /ttl_on hoàn tất (iptables POSTROUTING → TTL / HL)."
   else
-    send_code "❌ /ttl_on thất bại. Kiểm tra TETHER_NFQTTL_DIR (thư mục chứa nfqttl), root, iptables."
+    reason="$(escape_html "${TTL_ON_LAST_ERROR:-không xác định}")"
+    send_code "❌ /ttl_on thất bại: ${reason}
+
+<i>Gợi ý: service Magisk cần chạy root (uid 0); thử <code>iptables -t mangle -A OUTPUT -j TTL --ttl-set 64</code> trong adb shell để xem kernel có TTL không; tuỳ chọn <code>TETHER_TTL_OUT_IFACE</code> (vd. rmnet_data0).</i>"
   fi
 }
 
 handle_ttl_off() {
-  send_code "ℹ️ /ttl_off: không thực hiện thay đổi (theo cấu hình của bạn)."
+  ttl_tether_clear 2>/dev/null || true
+  send_code "ℹ️ /ttl_off: đã gỡ chuỗi tg_ttl_fix / tg_ttl_fix6 (và rule NFQUEUE cũ nfqttli/nfqttlo nếu còn)."
 }
 
 # Chỉ cho phép ký tự an toàn cho đích ping (tránh chèn lệnh).

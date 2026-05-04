@@ -129,17 +129,9 @@ $TEL"
   fi
 }
 
+# Giữ tên hàm cho status/signal; chỉ trả đúng một nhãn RAT (không ghép thêm mô tả loại khác).
 get_nettype_with_desc() {
-  base="$(get_nettype)"
-  case "$base" in
-    "5G") echo "5G (SA = Standalone, 5G thuần; NSA = Non-Standalone, 5G neo trên 4G LTE)" ;;
-    "5G (SA)") echo "5G (SA) – 5G độc lập (Standalone)" ;;
-    "LTE+NR (NSA)") echo "LTE+NR (NSA) – 4G LTE + 5G (Non-Standalone)" ;;
-    "LTE") echo "LTE – 4G LTE" ;;
-    "3G") echo "3G – UMTS/HSPA (3G)" ;;
-    "2G") echo "2G – GSM/EDGE (2G)" ;;
-    *) echo "$base" ;;
-  esac
+  get_nettype
 }
 
 get_operator_name() {
@@ -218,19 +210,6 @@ get_rsrq_db_from_dump() {
 
 get_sinr_db_from_dump() {
   echo "$1" | grep -oiE '(ssSinr|ssSNR|lteRssnr|rssnr|nrSsSinr)[=:]-?[0-9]+' | head -n1 | grep -oE '-?[0-9]+' | head -n1
-}
-
-get_voice_data_rat_lines_from_dump() {
-  dump="$1"
-  vn="$(echo "$dump" | grep -oE 'mVoiceNetworkType=[0-9]+' | head -n1 | cut -d= -f2)"
-  dn="$(echo "$dump" | grep -oE 'mDataNetworkType=[0-9]+' | head -n1 | cut -d= -f2)"
-  [ -z "$vn" ] && [ -z "$dn" ] && return
-  vr=""
-  dr=""
-  echo "$vn" | grep -qE '^[0-9]+$' && vr="$(rat_num_to_name "$vn")"
-  echo "$dn" | grep -qE '^[0-9]+$' && dr="$(rat_num_to_name "$dn")"
-  [ -n "$vr" ] && echo "Thoại: ${vr}"
-  [ -n "$dr" ] && echo "Dữ liệu: ${dr}"
 }
 
 get_roaming_status_vi_from_dump() {
