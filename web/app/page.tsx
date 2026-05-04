@@ -182,162 +182,161 @@ export default function HomePage() {
           <p className="lead">{t.lead}</p>
         </section>
 
-        <article
-          className="card form-card"
-          aria-labelledby="form-section-title"
-        >
-          <h2 id="form-section-title" className="form-section-title">
-            {t.formSectionTitle}
-          </h2>
+        <section className="builder-grid" aria-label={t.formSectionTitle}>
+          <article className="card form-card" aria-labelledby="form-section-title">
+            <h2 id="form-section-title" className="form-section-title">
+              {t.formSectionTitle}
+            </h2>
 
-          <form onSubmit={downloadZip} aria-busy={loading}>
-          <div className="field">
-            <label htmlFor="chatId">{t.chatLabel}</label>
-            <input
-              id="chatId"
-              name="chatId"
-              autoComplete="off"
-              placeholder={t.chatPh}
-              value={chatId}
-              onChange={(ev) => setChatId(ev.target.value)}
-              spellCheck={false}
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="token">{t.tokenLabel}</label>
-            <input
-              id="token"
-              name="token"
-              autoComplete="off"
-              placeholder="123456789:AA..."
-              value={token}
-              onChange={(ev) => setToken(ev.target.value)}
-              spellCheck={false}
-            />
-          </div>
-
-          <fieldset className="hotspot-fieldset">
-            <legend className="hotspot-legend">{t.hotspotFieldsetLegend}</legend>
-            <div className="field">
-              <label htmlFor="hotspotSsid">{t.hotspotSsidLabel}</label>
-              <input
-                id="hotspotSsid"
-                name="hotspotSsid"
-                autoComplete="off"
-                placeholder={t.hotspotSsidPh}
-                value={hotspotSsid}
-                onChange={(ev) => setHotspotSsid(ev.target.value)}
-                spellCheck={false}
-                autoCapitalize="none"
-                autoCorrect="off"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="hotspotPass">{t.hotspotPassLabel}</label>
-              <div className="password-input-row">
+            <form onSubmit={downloadZip} aria-busy={loading}>
+              <div className="field">
+                <label htmlFor="chatId">{t.chatLabel}</label>
                 <input
-                  id="hotspotPass"
-                  name="hotspotPass"
-                  type={hotspotPassVisible ? "text" : "password"}
-                  autoComplete="new-password"
-                  placeholder={t.hotspotPassPh}
-                  value={hotspotPass}
-                  onChange={(ev) => setHotspotPass(ev.target.value)}
+                  id="chatId"
+                  name="chatId"
+                  autoComplete="off"
+                  placeholder={t.chatPh}
+                  value={chatId}
+                  onChange={(ev) => setChatId(ev.target.value)}
                   spellCheck={false}
-                  autoCapitalize="none"
-                  autoCorrect="off"
                 />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setHotspotPassVisible((v) => !v)}
-                  aria-pressed={hotspotPassVisible}
-                  aria-label={
-                    hotspotPassVisible ? t.hotspotPassHideAria : t.hotspotPassShowAria
-                  }
-                  aria-controls="hotspotPass"
-                >
-                  {hotspotPassVisible ? t.hotspotPassHide : t.hotspotPassShow}
-                </button>
               </div>
-            </div>
-            <p className="hotspot-hint">{t.hotspotHint}</p>
-          </fieldset>
 
-          <div className="field checkbox-field">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={anydeskAutoMedia}
-                onChange={(ev) => setAnydeskAutoMedia(ev.target.checked)}
+              <div className="field">
+                <label htmlFor="token">{t.tokenLabel}</label>
+                <input
+                  id="token"
+                  name="token"
+                  autoComplete="off"
+                  placeholder="123456789:AA..."
+                  value={token}
+                  onChange={(ev) => setToken(ev.target.value)}
+                  spellCheck={false}
+                />
+              </div>
+
+              <fieldset className="hotspot-fieldset">
+                <legend className="hotspot-legend">{t.hotspotFieldsetLegend}</legend>
+                <div className="field">
+                  <label htmlFor="hotspotSsid">{t.hotspotSsidLabel}</label>
+                  <input
+                    id="hotspotSsid"
+                    name="hotspotSsid"
+                    autoComplete="off"
+                    placeholder={t.hotspotSsidPh}
+                    value={hotspotSsid}
+                    onChange={(ev) => setHotspotSsid(ev.target.value)}
+                    spellCheck={false}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="hotspotPass">{t.hotspotPassLabel}</label>
+                  <div className="password-input-row">
+                    <input
+                      id="hotspotPass"
+                      name="hotspotPass"
+                      type={hotspotPassVisible ? "text" : "password"}
+                      autoComplete="new-password"
+                      placeholder={t.hotspotPassPh}
+                      value={hotspotPass}
+                      onChange={(ev) => setHotspotPass(ev.target.value)}
+                      spellCheck={false}
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setHotspotPassVisible((v) => !v)}
+                      aria-pressed={hotspotPassVisible}
+                      aria-label={
+                        hotspotPassVisible ? t.hotspotPassHideAria : t.hotspotPassShowAria
+                      }
+                      aria-controls="hotspotPass"
+                    >
+                      {hotspotPassVisible ? t.hotspotPassHide : t.hotspotPassShow}
+                    </button>
+                  </div>
+                </div>
+                <p className="hotspot-hint">{t.hotspotHint}</p>
+              </fieldset>
+
+              <div className="field checkbox-field">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={anydeskAutoMedia}
+                    onChange={(ev) => setAnydeskAutoMedia(ev.target.checked)}
+                  />
+                  <span>{t.anydeskAutoMediaLabel}</span>
+                </label>
+              </div>
+
+              <button type="submit" disabled={loading}>
+                {loading ? t.submitting : t.submit}
+              </button>
+
+              {error ? (
+                <div className="err-block">
+                  <div className="err" role="alert">
+                    {error}
+                  </div>
+                  <p className="err-hint">
+                    {t.errContactHint}{" "}
+                    <a
+                      href={CONTACT_FACEBOOK_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t.errContactLink}
+                    </a>
+                    .
+                  </p>
+                </div>
+              ) : null}
+
+              <div className="hint">{t.hint}</div>
+            </form>
+          </article>
+
+          <aside className="card donate-card" aria-label={t.donateTitle}>
+            <h2 className="donate-title">{t.donateTitle}</h2>
+            <div className="donate-qr-wrap">
+              <img
+                className="donate-qr"
+                src={DONATE_VIETQR_URL}
+                width={220}
+                height={220}
+                alt={t.donateQrAlt}
+                decoding="async"
+                loading="lazy"
+                fetchPriority="low"
               />
-              <span>{t.anydeskAutoMediaLabel}</span>
-            </label>
-          </div>
-
-          <button type="submit" disabled={loading}>
-            {loading ? t.submitting : t.submit}
-          </button>
-
-          {error ? (
-            <div className="err-block">
-              <div className="err" role="alert">
-                {error}
-              </div>
-              <p className="err-hint">
-                {t.errContactHint}{" "}
-                <a
-                  href={CONTACT_FACEBOOK_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t.errContactLink}
-                </a>
-                .
-              </p>
-            </div>
-          ) : null}
-
-          <div className="hint">{t.hint}</div>
-        </form>
-
-        <footer className="footer-card">
-          <h2>{t.donateTitle}</h2>
-          <div className="donate-qr-wrap">
-            <img
-              className="donate-qr"
-              src={DONATE_VIETQR_URL}
-              width={220}
-              height={220}
-              alt={t.donateQrAlt}
-              decoding="async"
-              loading="lazy"
-              fetchPriority="low"
-            />
-            <div className="donate-meta">
-              <div>
-                <strong>{t.donateRecipient}</strong>
-              </div>
-              <div className="bank">
-                {t.donateBankName} · {DONATE_STK}
+              <div className="donate-meta">
+                <div>
+                  <strong>{t.donateRecipient}</strong>
+                </div>
+                <div className="bank">
+                  {t.donateBankName} · {DONATE_STK}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="links-row">
-            <a
-              href={CONTACT_FACEBOOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t.contactFacebook}
-            </a>
-          </div>
+            <div className="links-row">
+              <a
+                href={CONTACT_FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t.contactFacebook}
+              </a>
+            </div>
 
-          <p className="footer-tagline">{t.partnerFooter}</p>
-        </footer>
-        </article>
+            <p className="footer-tagline">{t.partnerFooter}</p>
+          </aside>
+        </section>
       </main>
     </div>
   );

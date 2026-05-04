@@ -83,7 +83,7 @@ body {
 }
 
 .page-shell {
-  max-width: 560px;
+  max-width: 1040px;
   margin: 0 auto;
   width: 100%;
 }
@@ -210,6 +210,33 @@ body {
 
 .hero {
   margin-bottom: 22px;
+}
+
+.builder-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 18px;
+  align-items: start;
+}
+
+.form-card {
+  min-width: 0;
+}
+
+.donate-card {
+  position: sticky;
+  top: 18px;
+  align-self: start;
+  padding: 22px;
+}
+
+.donate-title {
+  margin: 0 0 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.98rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
 }
 
 .hero-eyebrow {
@@ -557,18 +584,13 @@ kbd {
   border-top: 1px solid var(--border);
 }
 
-.footer-card h2 {
-  margin: 0 0 12px;
-  font-size: 1rem;
-}
-
 .donate-qr-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  margin: 0 0 18px;
-  padding: 18px 16px;
+  margin: 0 0 16px;
+  padding: 16px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--input-bg);
@@ -691,6 +713,17 @@ kbd {
 
   .hero {
     margin-bottom: 18px;
+  }
+
+  .builder-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .donate-card {
+    position: static;
+    top: auto;
+    padding: 20px 16px;
   }
 
   .hero-eyebrow {
