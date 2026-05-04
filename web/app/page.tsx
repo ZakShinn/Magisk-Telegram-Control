@@ -304,16 +304,6 @@ export default function HomePage() {
 
           <aside className="card donate-card" aria-label={t.donateTitle}>
             <h2 className="donate-title">{t.donateTitle}</h2>
-            <div className="logo-tile" aria-hidden="false">
-              <Image
-                className="logo-tile-img"
-                src="/logo.png"
-                alt={t.logoTileAlt}
-                width={220}
-                height={220}
-                priority={false}
-              />
-            </div>
             <div className="donate-qr-wrap">
               <div className="donate-qr-stack">
                 <div className="donate-qr-block">
@@ -340,36 +330,19 @@ export default function HomePage() {
 
                 <div className="donate-qr-block">
                   <div className="donate-qr-label">{t.donatePaypalLabel}</div>
-                  <a
-                    className="paypal-tile"
-                    href={DONATE_PAYPAL_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={t.donatePaypalOpenAria}
-                    title="paypal.me/Zakshin"
-                  >
-                    <span className="paypal-tile-inner">
-                      <span className="paypal-mark" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="34" height="34" fill="none">
-                          <path
-                            d="M7.2 18.5 9.1 5.9c.1-.8.8-1.4 1.6-1.4h5.3c3 0 4.7 1.6 4.2 4.4-.5 2.7-2.6 4.3-5.7 4.3h-2.4l-.7 5.3H7.2Z"
-                            stroke="currentColor"
-                            strokeWidth="1.6"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M10.6 19.5 12 9.5h3.3c2.3 0 3.7 1.1 3.3 3.2-.4 2-2 3-4.2 3H13l-.5 3.8h-1.9Z"
-                            stroke="currentColor"
-                            strokeWidth="1.6"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </span>
-                      <span className="paypal-title">{t.donatePaypalCta}</span>
-                      <span className="paypal-handle">paypal.me/Zakshin</span>
-                      <span className="paypal-sub">{t.donatePaypalSub}</span>
-                    </span>
-                  </a>
+                  <div className="donate-meta">
+                    <div>
+                      <a
+                        className="donate-paypal-link"
+                        href={DONATE_PAYPAL_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        paypal.me/Zakshin
+                      </a>
+                    </div>
+                    <div className="bank">{t.donatePaypalHint}</div>
+                  </div>
                 </div>
               </div>
             </div>
