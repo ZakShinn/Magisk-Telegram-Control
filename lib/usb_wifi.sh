@@ -27,6 +27,10 @@ rndis_on_apply() {
 handle_rndis_on() {
   send_code "🔌 Bật RNDIS (USB tether)..."
   rndis_on_apply
+  sleep 1
+  if [ "$(get_rndis_state_simple)" = "on" ]; then
+    send_code "🔌 RNDIS: <b>ĐÃ BẬT</b>"
+  fi
 }
 
 handle_rndis_off() {
@@ -112,11 +116,26 @@ handle_hotspot_on() {
   fi
 }
 
+# Monitor bỏ qua một lần "Hotspot đã tắt" trùng khi tắt bằng /hotspot_off (đã có tin từ handler).
+HOTSPOT_OFF_CMD_MARKER="/data/local/tmp/tg_hotspot_off_by_cmd"
+
 handle_hotspot_off() {
-  if cmd wifi stop-softap >/dev/null 2>&1 \
-    || svc wifi stop-softap >/dev/null 2>&1; then
+  was="$(get_hotspot_state_simple)"
+  if [ "$was" = "on" ]; then
+    : > "$HOTSPOT_OFF_CMD_MARKER"
+  fi
+  cmd wifi stop-softap >/dev/null 2>&1 || svc wifi stop-softap >/dev/null 2>&1 || true
+
+  i=0
+  while [ "$(get_hotspot_state_simple)" != "off" ] && [ "$i" -lt 25 ]; do
+    sleep 1
+    i=$((i + 1))
+  done
+
+  if [ "$(get_hotspot_state_simple)" = "off" ]; then
     send_code "✅ Hotspot đã tắt."
   else
+    rm -f "$HOTSPOT_OFF_CMD_MARKER" 2>/dev/null || true
     send_code "❌ Không tắt được hotspot (ROM hoặc quyền)."
   fi
 }

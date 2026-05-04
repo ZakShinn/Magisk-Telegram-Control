@@ -21,6 +21,11 @@ handle_help() {
 /hotspot_on [SSID MậtKhẩu]  - Bật hotspot (mặc định từ config)
 /hotspot_off  - Tắt Hotspot (Phát wifi)
 
+/wifi_on       - Bật Wi‑Fi
+/wifi_off      - Tắt Wi‑Fi
+/bt_on         - Bật Bluetooth
+/bt_off        - Tắt Bluetooth
+
 /shutdown     - Tắt máy
 /restart            - Khởi động lại
 <i>Không được spam /shutdown và /restart vì sẽ gây tình trạng tắt và khởi động liên tục do tồn tại yêu cầu chưa được thực hiện.</i>
@@ -319,6 +324,22 @@ dispatch_command() {
     "/hotspot_off")
       notify_command_received "$TEXT"
       handle_hotspot_off
+      ;;
+    "/wifi_on")
+      notify_command_received "$TEXT"
+      handle_wifi_on
+      ;;
+    "/wifi_off")
+      notify_command_received "$TEXT"
+      handle_wifi_off
+      ;;
+    "/bt_on")
+      notify_command_received "$TEXT"
+      handle_bt_on
+      ;;
+    "/bt_off")
+      notify_command_received "$TEXT"
+      handle_bt_off
       ;;
     "/loop_off")
       notify_command_received "$TEXT"

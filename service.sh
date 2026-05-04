@@ -18,6 +18,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/usb_wifi.sh"
 # shellcheck source=/dev/null
+. "${SCRIPT_DIR}/lib/wifi_bt.sh"
+# shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/netstats.sh"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/handlers.sh"

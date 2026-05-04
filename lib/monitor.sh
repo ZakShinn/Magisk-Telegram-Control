@@ -34,7 +34,12 @@ handle_monitor_changes() {
       if [ "$cur_hotspot" = "on" ]; then
         send_code "📡 Hotspot: <b>ĐÃ BẬT</b>"
       elif [ "$cur_hotspot" = "off" ]; then
-        send_code "📡 Hotspot: <b>ĐÃ TẮT</b>"
+        # /hotspot_off đã gửi "Hotspot đã tắt." sau khi kiểm tra — tránh trùng tin.
+        if [ -f /data/local/tmp/tg_hotspot_off_by_cmd ]; then
+          rm -f /data/local/tmp/tg_hotspot_off_by_cmd 2>/dev/null || true
+        else
+          send_code "📡 Hotspot: <b>ĐÃ TẮT</b>"
+        fi
       else
         send_code "📡 Hotspot: <b>KHÔNG RÕ</b>"
       fi
