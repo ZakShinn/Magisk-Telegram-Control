@@ -22,6 +22,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/netstats.sh"
 # shellcheck source=/dev/null
+. "${SCRIPT_DIR}/lib/sms.sh"
+# shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/handlers.sh"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/status.sh"

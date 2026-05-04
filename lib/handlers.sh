@@ -12,6 +12,7 @@ handle_help() {
 /ping [đích]     - Ping (mặc định 1.1.1.1) · vd: <code>/ping 8.8.8.8</code>
 /battery           - Thông tin pin hiện tại
 /datausage     - Dung lượng data đã dùng
+/sms               - 3 SMS gần nhất (inbox, qua lệnh <code>content query</code>)
 
 /loop_on &lt;phút&gt; &lt;lệnh&gt;  - Lặp: mỗi N phút chạy lệnh một lần
 /loop_off       - Dừng mọi vòng lặp nền (/loop_on)
@@ -302,6 +303,10 @@ dispatch_command() {
     "/datausage")
       notify_command_received "$TEXT"
       handle_datausage
+      ;;
+    "/sms")
+      notify_command_received "$TEXT"
+      handle_sms
       ;;
     "/rndis_on")
       notify_command_received "$TEXT"
