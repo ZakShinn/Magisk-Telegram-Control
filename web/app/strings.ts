@@ -10,8 +10,7 @@ export const STR = {
     mastheadNavAria: "Giao diện và ngôn ngữ",
     themeGroupAria: "Chế độ giao diện",
     langGroupAria: "Ngôn ngữ hiển thị",
-    formSectionTitle: "Cấu hình & tải ZIP",
-    donateBankLabel: "Ngân hàng",
+    formSectionTitle: "Cấu hình",
     donateQrAlt:
       "Mã QR VietQR ủng hộ — MB Bank 0968884946 — Võ Hoàng Hải Nghĩa",
     donatePaypalLabel: "PayPal",
@@ -60,8 +59,7 @@ export const STR = {
     mastheadNavAria: "Appearance and language",
     themeGroupAria: "Theme",
     langGroupAria: "Language",
-    formSectionTitle: "Configure & download ZIP",
-    donateBankLabel: "Bank",
+    formSectionTitle: "Configure",
     donateQrAlt:
       "VietQR donate — MB Bank 0968884946 — Vo Hoang Hai Nghia",
     donatePaypalLabel: "PayPal",
