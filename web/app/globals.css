@@ -52,6 +52,8 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   font-family:
     ui-sans-serif,
     system-ui,
@@ -670,6 +672,7 @@ kbd {
 
   .site-brand {
     padding: 6px 8px 6px 6px;
+    margin: 0;
   }
 
   .brand-tagline {
