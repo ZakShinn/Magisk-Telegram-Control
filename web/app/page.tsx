@@ -328,7 +328,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="donate-qr-block">
+                <div className="donate-qr-block donate-paypal-hover-zone">
                   <div className="donate-qr-label">{t.donatePaypalLabel}</div>
                   <div className="donate-meta">
                     <div>
@@ -341,6 +341,16 @@ export default function HomePage() {
                         paypal.me/Zakshin
                       </a>
                     </div>
+                  </div>
+                  <div className="donate-paypal-popover" aria-hidden="true">
+                    <Image
+                      className="donate-paypal-preview-img"
+                      src="/Paypal.png"
+                      alt=""
+                      width={220}
+                      height={220}
+                      loading="lazy"
+                    />
                   </div>
                 </div>
               </div>

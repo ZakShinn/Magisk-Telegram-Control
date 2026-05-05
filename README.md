@@ -53,8 +53,17 @@ Sau khi cài, module chỉ nhận lệnh từ **Chat ID** bạn đã nhúng vào
 
 ### Ủng hộ / Donate
 
-- MB Bank: **0968884946**
-- PayPal: **paypal.me/Zakshin**
+**MB Bank:** **0968884946**
+
+<p align="center">
+  <img src="https://img.vietqr.io/image/MB-0968884946-compact.png?addTag=ZakshinTools" alt="QR VietQR MB Bank 0968884946" width="220" height="220" />
+</p>
+
+**PayPal:** [paypal.me/Zakshin](https://paypal.me/Zakshin)
+
+<p align="center">
+  <img src="./Paypal.png" alt="PayPal donate — paypal.me/Zakshin" width="220" />
+</p>
 
 
 ---
@@ -108,6 +117,15 @@ After install, the module only accepts commands from the **Chat ID** embedded in
 
 ### Donate
 
-- MB Bank: **0968884946**
-- PayPal: **paypal.me/Zakshin**
+**MB Bank:** **0968884946**
+
+<p align="center">
+  <img src="https://img.vietqr.io/image/MB-0968884946-compact.png?addTag=ZakshinTools" alt="VietQR donate MB Bank 0968884946" width="220" height="220" />
+</p>
+
+**PayPal:** [paypal.me/Zakshin](https://paypal.me/Zakshin)
+
+<p align="center">
+  <img src="./Paypal.png" alt="PayPal donate — paypal.me/Zakshin" width="220" />
+</p>
 

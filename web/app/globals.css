@@ -637,6 +637,42 @@ kbd {
   text-decoration: underline;
 }
 
+.donate-paypal-hover-zone {
+  position: relative;
+}
+
+.donate-paypal-popover {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(100% - 12px);
+  z-index: 30;
+  padding-top: 14px;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.14s ease,
+    visibility 0.14s ease;
+  pointer-events: none;
+}
+
+.donate-paypal-hover-zone:hover .donate-paypal-popover,
+.donate-paypal-hover-zone:focus-within .donate-paypal-popover {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.donate-paypal-preview-img {
+  display: block;
+  width: 220px;
+  height: auto;
+  max-width: min(220px, 85vw);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 4px 14px var(--shadow);
+}
+
 .donate-qr {
   display: block;
   width: 220px;
