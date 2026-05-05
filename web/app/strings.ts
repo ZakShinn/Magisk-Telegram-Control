@@ -15,7 +15,7 @@ export const STR = {
     donateQrAlt:
       "Mã QR VietQR ủng hộ — MB Bank 0968884946 — Võ Hoàng Hải Nghĩa",
     donatePaypalLabel: "PayPal",
-    title: "TelegramControl · Builder ZIP module",
+    title: "Magisk Telegram Control · Builder ZIP module",
     lead:
       "Nhập Bot Token và Chat ID để tạo file ZIP module Magisk đã nhúng config.sh. Tải về và flash trong Magisk như module thông thường.",
     tokenLabel: "Bot token (@BotFather)",
@@ -67,7 +67,7 @@ export const STR = {
     donateQrAlt:
       "VietQR donate — MB Bank 0968884946 — Vo Hoang Hai Nghia",
     donatePaypalLabel: "PayPal",
-    title: "TelegramControl · Magisk ZIP builder",
+    title: "Magisk Telegram Control · Magisk ZIP builder",
     lead:
       "Enter your Bot Token and Chat ID to build a Magisk module ZIP with embedded config.sh. Download and flash in Magisk as usual.",
     tokenLabel: "Bot token (@BotFather)",

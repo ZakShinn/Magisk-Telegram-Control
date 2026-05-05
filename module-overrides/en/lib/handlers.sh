@@ -1,6 +1,12 @@
 # shellcheck shell=sh
 # Telegram command handlers
 
+bot_my_commands_json() {
+  cat <<'EOF' | tr -d '\n'
+[{"command":"help","description":"Show command list"},{"command":"start","description":"Start (same as /help)"},{"command":"dev","description":"Experimental commands (wifi/bt/loop)"},{"command":"status","description":"Basic device status"},{"command":"signal","description":"Cellular report"},{"command":"ip","description":"Local IPv4/IPv6 + public WAN IP"},{"command":"ping","description":"Ping a target (e.g. ping 8.8.8.8)"},{"command":"battery","description":"Current battery info"},{"command":"datausage","description":"Realtime interface traffic totals"},{"command":"sms","description":"Read inbox SMS (e.g. sms 5)"},{"command":"rndis_on","description":"Enable RNDIS (USB tether)"},{"command":"rndis_off","description":"Disable RNDIS (USB tether)"},{"command":"hotspot_on","description":"Enable hotspot"},{"command":"hotspot_off","description":"Disable hotspot"},{"command":"wifi_on","description":"Enable Wi‑Fi"},{"command":"wifi_off","description":"Disable Wi‑Fi"},{"command":"bt_on","description":"Enable Bluetooth"},{"command":"bt_off","description":"Disable Bluetooth"},{"command":"loop_on","description":"Repeat a command every N minutes"},{"command":"loop_off","description":"Stop all background loops"},{"command":"shutdown","description":"Power off"},{"command":"restart","description":"Reboot"}]
+EOF
+}
+
 handle_help() {
   msg="$(cat <<'EOF'
 <b>Commands:</b>

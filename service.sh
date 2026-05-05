@@ -1,8 +1,8 @@
 #!/system/bin/sh
 # Bot Telegram điều khiển thiết bị — bản gốc (tính năng + thông báo như old/)
 
-TELEGRAM_TOKEN="8298693641:AAEnMY9EUmO0MO6VL1RK6q7ZFrUGZjuI0Ak"
-TELEGRAM_CHAT_ID="1189961723"
+TELEGRAM_TOKEN=""
+TELEGRAM_CHAT_ID=""
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -36,6 +36,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 BOT_OFFSET_FILE="/data/local/tmp/tg_device_bot_offset"
 LOOP_PID_FILE="/data/local/tmp/tg_device_bot_loop_pids"
+BOT_COMMANDS_SYNCED_FILE="/data/local/tmp/tg_device_bot_commands_synced"
 
 start_anydesk_auto_media_loop || true
 
@@ -57,6 +58,11 @@ fi
 (
   for i in $(seq 1 120); do
     if has_network; then
+      # Sync Telegram command list once per boot (best effort).
+      if [ ! -f "$BOT_COMMANDS_SYNCED_FILE" ]; then
+        telegram_set_my_commands "$(bot_my_commands_json)" || true
+        : >"$BOT_COMMANDS_SYNCED_FILE" 2>/dev/null || true
+      fi
       handle_status_on_boot
       exit 0
     fi

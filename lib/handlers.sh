@@ -1,6 +1,14 @@
 # shellcheck shell=sh
 # Xử lý lệnh Telegram (giống bản gốc trong old/service.sh)
 
+bot_my_commands_json() {
+  # Keep this list in sync with dispatch_command().
+  # Telegram expects no leading slash in `command`.
+  cat <<'EOF' | tr -d '\n'
+[{"command":"help","description":"Hiển thị danh sách lệnh"},{"command":"start","description":"Bắt đầu (giống /help)"},{"command":"dev","description":"Lệnh thử nghiệm (wifi/bt/loop)"},{"command":"status","description":"Hiển thị thông tin cơ bản của thiết bị"},{"command":"signal","description":"Báo cáo mạng di động"},{"command":"ip","description":"IPv4 / IPv6 cục bộ + WAN public"},{"command":"ping","description":"Ping một đích (vd: ping 8.8.8.8)"},{"command":"battery","description":"Thông tin pin hiện tại"},{"command":"datausage","description":"Dung lượng data đã dùng"},{"command":"sms","description":"Đọc SMS inbox (vd: sms 5)"},{"command":"rndis_on","description":"Bật RNDIS (USB tether)"},{"command":"rndis_off","description":"Tắt RNDIS (USB tether)"},{"command":"hotspot_on","description":"Bật hotspot"},{"command":"hotspot_off","description":"Tắt hotspot"},{"command":"wifi_on","description":"Bật Wi‑Fi"},{"command":"wifi_off","description":"Tắt Wi‑Fi"},{"command":"bt_on","description":"Bật Bluetooth"},{"command":"bt_off","description":"Tắt Bluetooth"},{"command":"loop_on","description":"Lặp lệnh mỗi N phút"},{"command":"loop_off","description":"Dừng mọi vòng lặp nền"},{"command":"shutdown","description":"Tắt máy"},{"command":"restart","description":"Khởi động lại"}]
+EOF
+}
+
 handle_help() {
   msg="$(cat <<'EOF'
 <b>Lệnh hỗ trợ:</b>
