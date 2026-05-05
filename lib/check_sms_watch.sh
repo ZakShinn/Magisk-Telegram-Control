@@ -2,12 +2,8 @@
 # /check_sms_on — kiểm tra định kỳ inbox; SMS mới → gửi Telegram. /check_sms_off — dừng.
 
 CHECK_SMS_WATCH_PID_FILE="${CHECK_SMS_WATCH_PID_FILE:-/data/local/tmp/tg_device_bot_check_sms_watch_pid}"
-<<<<<<< HEAD
-CHECK_SMS_WATCH_LAST_ID_FILE="${CHECK_SMS_WATCH_LAST_ID_FILE:-/data/local/tmp/tg_device_bot_check_sms_last_id}"
-=======
 CHECK_SMS_WATCH_LAST_TS_FILE="${CHECK_SMS_WATCH_LAST_TS_FILE:-/data/local/tmp/tg_device_bot_check_sms_last_ts}"
 CHECK_SMS_WATCH_LAST_TIE_FILE="${CHECK_SMS_WATCH_LAST_TIE_FILE:-/data/local/tmp/tg_device_bot_check_sms_last_tie}"
->>>>>>> parent of 15479a9 (remove check sms)
 CHECK_SMS_WATCH_SORT_TMP="${CHECK_SMS_WATCH_SORT_TMP:-/data/local/tmp/tg_chk_sms_watch_sort}"
 CHECK_SMS_WATCH_INTERVAL="${CHECK_SMS_WATCH_INTERVAL:-30}"
 
@@ -16,15 +12,12 @@ _check_sms_watch_extract_id() {
   printf '%s' "$1" | sed -n 's/.*_id=[[:space:]]*\([0-9][0-9]*\).*/\1/p'
 }
 
-<<<<<<< HEAD
-=======
 _check_sms_watch_extract_date() {
   # `content query` typically prints `date=1710000000000` (ms since epoch)
   # Sometimes additional fields exist; keep patterns permissive.
   printf '%s' "$1" | sed -n 's/.*, date=[[:space:]]*\([0-9][0-9]*\),.*/\1/p'
 }
 
->>>>>>> parent of 15479a9 (remove check sms)
 _check_sms_watch_is_perm_error() {
   # Common permission/SELinux error strings from `content query`
   # We keep it broad because vendors customize messages.
@@ -81,14 +74,6 @@ _check_sms_watch_loop() {
     return 1
   fi
   row="$(printf '%s' "$raw" | grep '^Row:' | head -n1)"
-<<<<<<< HEAD
-  base=0
-  if [ -n "$row" ]; then
-    base="$(_check_sms_watch_extract_id "$row")"
-    case "$base" in ''|*[!0-9]*) base=0 ;; esac
-  fi
-  printf '%s' "$base" > "$CHECK_SMS_WATCH_LAST_ID_FILE"
-=======
   base_ts=0
   base_id=0
   if [ -n "$row" ]; then
@@ -101,7 +86,6 @@ _check_sms_watch_loop() {
   printf '%s' "$base_ts" > "$CHECK_SMS_WATCH_LAST_TS_FILE"
   # Tie-breaker: last delivered (ts,id) to avoid duplicates when many SMS share same ms timestamp.
   printf '%s,%s' "$base_ts" "$base_id" > "$CHECK_SMS_WATCH_LAST_TIE_FILE"
->>>>>>> parent of 15479a9 (remove check sms)
 
   while true; do
     sleep "$CHECK_SMS_WATCH_INTERVAL"
@@ -112,24 +96,6 @@ _check_sms_watch_loop() {
       return 1
     fi
     row_top="$(printf '%s' "$raw_top" | grep '^Row:' | head -n1)"
-<<<<<<< HEAD
-    cur_top=0
-    if [ -n "$row_top" ]; then
-      cur_top="$(_check_sms_watch_extract_id "$row_top")"
-      case "$cur_top" in ''|*[!0-9]*) cur_top=0 ;; esac
-    fi
-
-    last="$(cat "$CHECK_SMS_WATCH_LAST_ID_FILE" 2>/dev/null)"
-    case "$last" in ''|*[!0-9]*) last=0 ;; esac
-
-    # Inbox tip giảm (xóa tin): đồng bộ watermark.
-    if [ "$cur_top" -lt "$last" ] 2>/dev/null; then
-      printf '%s' "$cur_top" > "$CHECK_SMS_WATCH_LAST_ID_FILE"
-      continue
-    fi
-
-    [ "$cur_top" -gt "$last" ] 2>/dev/null || continue
-=======
     cur_top_ts=0
     cur_top_id=0
     if [ -n "$row_top" ]; then
@@ -157,7 +123,6 @@ _check_sms_watch_loop() {
 
     # No new window.
     [ "$cur_top_ts" -gt "$last_ts" ] 2>/dev/null || continue
->>>>>>> parent of 15479a9 (remove check sms)
 
     batch="$(_check_sms_watch_query_raw_limit 80)"
     if _check_sms_watch_is_perm_error "$batch"; then
@@ -172,12 +137,6 @@ _check_sms_watch_loop() {
     rm -f "$CHECK_SMS_WATCH_SORT_TMP"
     while IFS= read -r line || [ -n "$line" ]; do
       [ -z "$line" ] && continue
-<<<<<<< HEAD
-      id="$(_check_sms_watch_extract_id "$line")"
-      case "$id" in ''|*[!0-9]*) continue ;; esac
-      [ "$id" -gt "$last" ] || continue
-      printf '%s\t%s\n' "$id" "$line" >> "$CHECK_SMS_WATCH_SORT_TMP"
-=======
       ts="$(_check_sms_watch_extract_date "$line")"
       [ -z "$ts" ] && ts="$(printf '%s' "$line" | sed -n 's/.*date=[[:space:]]*\([0-9][0-9]*\).*/\1/p')"
       case "$ts" in ''|*[!0-9]*) continue ;; esac
@@ -191,22 +150,12 @@ _check_sms_watch_loop() {
       fi
       # sort key: ts then id
       printf '%s\t%s\t%s\n' "$ts" "$id" "$line" >> "$CHECK_SMS_WATCH_SORT_TMP"
->>>>>>> parent of 15479a9 (remove check sms)
     done < "$tmp_rows"
     rm -f "$tmp_rows"
 
     if [ -f "$CHECK_SMS_WATCH_SORT_TMP" ] && [ -s "$CHECK_SMS_WATCH_SORT_TMP" ]; then
       sort -n "$CHECK_SMS_WATCH_SORT_TMP" | while IFS= read -r rec || [ -n "$rec" ]; do
         [ -z "$rec" ] && continue
-<<<<<<< HEAD
-        id="$(printf '%s' "$rec" | cut -f1)"
-        line="$(printf '%s' "$rec" | cut -f2-)"
-        case "$id" in ''|*[!0-9]*) continue ;; esac
-        [ "$id" -gt "$last" ] || continue
-        _check_sms_watch_send_one_row "$line"
-      done
-      printf '%s' "$cur_top" > "$CHECK_SMS_WATCH_LAST_ID_FILE"
-=======
         ts="$(printf '%s' "$rec" | cut -f1)"
         id="$(printf '%s' "$rec" | cut -f2)"
         line="$(printf '%s' "$rec" | cut -f3-)"
@@ -215,7 +164,6 @@ _check_sms_watch_loop() {
       done
       printf '%s' "$cur_top_ts" > "$CHECK_SMS_WATCH_LAST_TS_FILE"
       printf '%s,%s' "$cur_top_ts" "$cur_top_id" > "$CHECK_SMS_WATCH_LAST_TIE_FILE"
->>>>>>> parent of 15479a9 (remove check sms)
     fi
 
     rm -f "$CHECK_SMS_WATCH_SORT_TMP"
@@ -262,12 +210,8 @@ handle_check_sms_watch_off() {
     ok=1
   fi
   rm -f "$CHECK_SMS_WATCH_PID_FILE"
-<<<<<<< HEAD
-  rm -f "$CHECK_SMS_WATCH_LAST_ID_FILE"
-=======
   rm -f "$CHECK_SMS_WATCH_LAST_TS_FILE"
   rm -f "$CHECK_SMS_WATCH_LAST_TIE_FILE"
->>>>>>> parent of 15479a9 (remove check sms)
   rm -f "$CHECK_SMS_WATCH_SORT_TMP"
   if [ "$ok" = 1 ]; then
     send_code "✅ Đã <b>tắt</b> theo dõi SMS."

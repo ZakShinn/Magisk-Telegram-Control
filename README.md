@@ -4,7 +4,7 @@
 
 ---
 
-
+<a id="tieng-viet"></a>
 
 ## Tiếng Việt
 
@@ -46,6 +46,7 @@ Sau khi cài, module chỉ nhận lệnh từ **Chat ID** bạn đã nhúng vào
 - `/bt_on`, `/bt_off`: Bluetooth
 - `/shutdown`, `/restart`: tắt máy / reboot (không spam)
 
+
 ### Bảo mật
 
 - Không công khai **Bot token** hoặc `config.sh`.
@@ -54,15 +55,20 @@ Sau khi cài, module chỉ nhận lệnh từ **Chat ID** bạn đã nhúng vào
 
 **MB Bank:** **0968884946**
 
-
+<p align="center">
+  <img src="https://img.vietqr.io/image/MB-0968884946-compact.png?addTag=ZakshinTools" alt="QR VietQR MB Bank 0968884946" width="220" height="220" />
+</p>
 
 **PayPal:** [paypal.me/Zakshin](https://paypal.me/Zakshin)
 
+<p align="center">
+  <img src="./Paypal.png" alt="PayPal donate — paypal.me/Zakshin" width="220" />
+</p>
 
 
 ---
 
-
+<a id="english"></a>
 
 ## English
 
@@ -104,6 +110,7 @@ After install, the module only accepts commands from the **Chat ID** embedded in
 - `/bt_on`, `/bt_off`: Bluetooth
 - `/shutdown`, `/restart`: power off / reboot (do not spam)
 
+
 ### Security
 
 - Never publish your **bot token** or `config.sh`.
@@ -112,7 +119,13 @@ After install, the module only accepts commands from the **Chat ID** embedded in
 
 **MB Bank:** **0968884946**
 
-
+<p align="center">
+  <img src="https://img.vietqr.io/image/MB-0968884946-compact.png?addTag=ZakshinTools" alt="VietQR donate MB Bank 0968884946" width="220" height="220" />
+</p>
 
 **PayPal:** [paypal.me/Zakshin](https://paypal.me/Zakshin)
+
+<p align="center">
+  <img src="./Paypal.png" alt="PayPal donate — paypal.me/Zakshin" width="220" />
+</p>
 

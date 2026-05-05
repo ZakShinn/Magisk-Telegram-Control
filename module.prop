@@ -1,6 +1,6 @@
 id=TelegramControl
 name=Điều khiển thiết bị thông qua Telegram Control
-version=4.9 final
-versionCode=49
+version=4.2
+versionCode=42
 author=Zakshin (Hải Nghĩa)
 description=Điều khiển máy qua Bot Telegram. Donate PayPal https://paypal.me/Zakshin · Timo/Momo STK 0968884946

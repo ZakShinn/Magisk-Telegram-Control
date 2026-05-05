@@ -30,13 +30,3 @@ has_network() {
   curl -s --max-time 5 "${BOT_API}/getMe" | grep -q '"ok":true'
 }
 
-telegram_set_my_commands() {
-  commands_json="$1"
-  [ -z "$TELEGRAM_TOKEN" ] && return 1
-  [ -z "$commands_json" ] && return 1
-
-  curl -s "${BOT_API}/setMyCommands" \
-    --data-urlencode "commands=${commands_json}" >/dev/null 2>&1 || return 1
-  return 0
-}
-

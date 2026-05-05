@@ -8,13 +8,11 @@ const siteUrl = getSiteUrl();
 export const metadata: Metadata = {
   metadataBase: siteUrl,
   title: {
-    // 50–60 chars, keyword-left (Google).
-    default: "Magisk Telegram Control - Tạo module điều khiển Android",
-    template: "%s | Magisk Telegram Control",
+    default: "TelegramControl — Magisk module builder · ZIP Telegram bot",
+    template: "%s · TelegramControl",
   },
   description:
-    // 150–160 chars, keyword + CTA (Google).
-    "Tạo Magisk module điều khiển Android qua Telegram bot: nhúng token/chat id, tải ZIP và flash. Bắt đầu ngay để quản lý máy từ xa an toàn.",
+    "Tạo ZIP module Magisk nhúng Bot Token và Chat ID (config.sh), flash trên Android để điều khiển máy qua Telegram. · Build a Magisk ZIP with embedded Telegram bot config for remote phone control.",
   applicationName: "TelegramControl",
   authors: [{ name: "Zakshin (Hải Nghĩa)" }],
   icons: {
@@ -49,24 +47,24 @@ export const metadata: Metadata = {
     alternateLocale: ["en_US"],
     url: siteUrl,
     siteName: "TelegramControl",
-    title: "Tạo Magisk module điều khiển Android qua Telegram",
+    title: "TelegramControl — Magisk module builder",
     description:
-      "Build ZIP module Magisk với token/chat id sẵn sàng flash. Chia sẻ link đẹp trên Facebook và hiển thị chuẩn Google.",
+      "Tải ZIP module Magisk đã nhúng Telegram bot · Download configured Magisk module for Android.",
     images: [
       {
-        url: "/og",
-        width: 1200,
-        height: 630,
-        alt: "Magisk Telegram Control - Tạo module điều khiển Android",
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "TelegramControl",
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Magisk Telegram Control - Tạo module điều khiển Android",
+    card: "summary",
+    title: "TelegramControl — Magisk module builder",
     description:
-      "Tạo ZIP module Magisk nhúng token/chat id để điều khiển Android qua Telegram bot. Tải về và flash ngay.",
-    images: ["/og"],
+      "Magisk ZIP + Telegram bot config.sh · Module điều khiển Android qua Telegram.",
+    images: ["/logo.png"],
   },
   robots: {
     index: true,

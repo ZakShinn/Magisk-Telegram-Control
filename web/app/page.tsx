@@ -117,7 +117,7 @@ export default function HomePage() {
             <Image
               className="brand-logo"
               src="/logo.png"
-              alt="Logo Magisk Telegram Control (TelegramControl)"
+              alt=""
               width={44}
               height={44}
               priority
@@ -346,7 +346,7 @@ export default function HomePage() {
                     <Image
                       className="donate-paypal-preview-img"
                       src="/Paypal.png"
-                      alt="PayPal donate QR - TelegramControl"
+                      alt=""
                       width={220}
                       height={220}
                       loading="lazy"
@@ -366,7 +366,7 @@ export default function HomePage() {
                 <Image
                   className="donate-logo-image"
                   src="/logo.png"
-                  alt="TelegramControl - Magisk Telegram Control"
+                  alt=""
                   width={220}
                   height={220}
                   loading="lazy"
