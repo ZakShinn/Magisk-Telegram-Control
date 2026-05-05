@@ -40,9 +40,6 @@ handle_dev() {
 
 /loop_on &lt;phút&gt; &lt;lệnh&gt;  - Lặp: mỗi N phút chạy lệnh một lần
 /loop_off       - Dừng mọi vòng lặp nền (/loop_on)
-
-/check_sms_on   - Bật: có SMS mới trong inbox → gửi nội dung qua Telegram (kiểm tra định kỳ)
-/check_sms_off  - Tắt theo dõi SMS
 EOF
 )"
   send_code "$msg"
@@ -320,14 +317,6 @@ dispatch_command() {
     "/datausage")
       notify_command_received "$TEXT"
       handle_datausage
-      ;;
-    /check_sms_on*)
-      notify_command_received "$TEXT"
-      handle_check_sms_watch_on "$CID"
-      ;;
-    /check_sms_off*)
-      notify_command_received "$TEXT"
-      handle_check_sms_watch_off
       ;;
     /sms*)
       notify_command_received "$TEXT"
