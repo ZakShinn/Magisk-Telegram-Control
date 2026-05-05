@@ -7,19 +7,20 @@ CHECK_SMS_WATCH_SORT_TMP="${CHECK_SMS_WATCH_SORT_TMP:-/data/local/tmp/tg_chk_sms
 CHECK_SMS_WATCH_INTERVAL="${CHECK_SMS_WATCH_INTERVAL:-30}"
 
 _check_sms_watch_extract_id() {
-  printf '%s' "$1" | sed -n 's/.*_id=\([0-9][0-9]*\).*/\1/p'
+  # `content query` may output `_id=123` or `_id= 123` depending on Android build.
+  printf '%s' "$1" | sed -n 's/.*_id=[[:space:]]*\([0-9][0-9]*\).*/\1/p'
+}
+
+_check_sms_watch_is_perm_error() {
+  printf '%s' "$1" | grep -qiE 'permission denial|securityexception|requires .*read_sms|not allowed to access'
 }
 
 _check_sms_watch_query_raw_limit() {
   lim="$1"
   bin="$(_sms_content_bin)"
   [ -z "$bin" ] && return 1
-  out="$($bin query --uri "$SMS_INBOX_URI" --projection _id,address,date,body --sort "date DESC" --limit "$lim" 2>/dev/null)"
-  if printf '%s' "$out" | grep -q '^Row:'; then
-    printf '%s' "$out"
-    return 0
-  fi
-  printf '%s' "$($bin query --uri "$SMS_INBOX_URI" --projection _id,address,date,body --sort "date DESC" --limit "$lim" 2>/dev/null)"
+  out="$($bin query --uri "$SMS_INBOX_URI" --projection _id,address,date,body --sort "date DESC" --limit "$lim" 2>&1)"
+  printf '%s' "$out"
 }
 
 _check_sms_watch_send_one_row() {
@@ -58,6 +59,10 @@ _check_sms_watch_loop() {
   [ -z "$bin" ] && return 1
 
   raw="$(_check_sms_watch_query_raw_limit 1)"
+  if _check_sms_watch_is_perm_error "$raw"; then
+    send_code "❌ Cannot watch SMS: blocked by <code>READ_SMS</code> permission or ROM policy for <code>content://sms</code> in background."
+    return 1
+  fi
   row="$(printf '%s' "$raw" | grep '^Row:' | head -n1)"
   base=0
   if [ -n "$row" ]; then
@@ -70,6 +75,10 @@ _check_sms_watch_loop() {
     sleep "$CHECK_SMS_WATCH_INTERVAL"
 
     raw_top="$(_check_sms_watch_query_raw_limit 1)"
+    if _check_sms_watch_is_perm_error "$raw_top"; then
+      send_code "❌ Stopped SMS watch: no permission to read SMS (<code>READ_SMS</code>) / ROM blocks inbox access."
+      return 1
+    fi
     row_top="$(printf '%s' "$raw_top" | grep '^Row:' | head -n1)"
     cur_top=0
     if [ -n "$row_top" ]; then
@@ -89,6 +98,10 @@ _check_sms_watch_loop() {
     [ "$cur_top" -gt "$last" ] 2>/dev/null || continue
 
     batch="$(_check_sms_watch_query_raw_limit 80)"
+    if _check_sms_watch_is_perm_error "$batch"; then
+      send_code "❌ Stopped SMS watch: cannot read inbox (Permission Denial)."
+      return 1
+    fi
     [ -z "$batch" ] && continue
 
     tmp_rows="/data/local/tmp/tg_chk_sms_rows.$$"

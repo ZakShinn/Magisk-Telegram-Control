@@ -321,11 +321,11 @@ dispatch_command() {
       notify_command_received "$TEXT"
       handle_datausage
       ;;
-    "/check_sms_on")
+    /check_sms_on*)
       notify_command_received "$TEXT"
       handle_check_sms_watch_on "$CID"
       ;;
-    "/check_sms_off")
+    /check_sms_off*)
       notify_command_received "$TEXT"
       handle_check_sms_watch_off
       ;;
