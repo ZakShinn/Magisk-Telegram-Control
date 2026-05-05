@@ -24,6 +24,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/sms.sh"
 # shellcheck source=/dev/null
+. "${SCRIPT_DIR}/lib/check_sms_watch.sh"
+# shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/handlers.sh"
 # shellcheck source=/dev/null
 . "${SCRIPT_DIR}/lib/status.sh"
@@ -41,6 +43,7 @@ start_anydesk_auto_media_loop || true
 
 # Tiến trình /loop_on không sống sót qua khởi động lại service; xóa PID cũ tránh kill nhầm.
 rm -f "$LOOP_PID_FILE" 2>/dev/null || true
+rm -f "$CHECK_SMS_WATCH_PID_FILE" 2>/dev/null || true
 
 if [ -f "$BOT_OFFSET_FILE" ]; then
   OFFSET="$(cat "$BOT_OFFSET_FILE" 2>/dev/null || echo 0)"

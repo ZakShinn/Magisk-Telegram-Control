@@ -5,8 +5,9 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..", "..");
 const destRoots = {
-  default: path.resolve(__dirname, "..", "module-files"),
+  /** Vietnamese: repo root + optional module-overrides/vi */
   vi: path.resolve(__dirname, "..", "module-files-vi"),
+  /** English: repo root + module-overrides/en */
   en: path.resolve(__dirname, "..", "module-files-en"),
 };
 
@@ -85,8 +86,7 @@ function syncOne(destRoot, lang) {
   if (lang) applyOverrides(lang, destRoot);
 }
 
-syncOne(destRoots.default, "");
 syncOne(destRoots.vi, "vi");
 syncOne(destRoots.en, "en");
 
-console.log("sync-module: copied module → web/module-files (+ vi/en variants)");
+console.log("sync-module: copied module → web/module-files-vi + web/module-files-en");

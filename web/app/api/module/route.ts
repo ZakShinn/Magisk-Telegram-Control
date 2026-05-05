@@ -114,17 +114,35 @@ export async function POST(req: Request) {
     );
   }
 
-  const rootDefault = path.join(process.cwd(), "module-files");
-  const rootLang =
-    LANG_RE.test(lang) ? path.join(process.cwd(), `module-files-${lang}`) : "";
-  const root = rootLang && fs.existsSync(rootLang) ? rootLang : rootDefault;
-
   if (lang !== "" && !LANG_RE.test(lang)) {
     return jsonBilingual(
       400,
       "Ngôn ngữ không hợp lệ (chỉ hỗ trợ vi/en).",
       "Invalid language (supported: vi/en).",
     );
+  }
+
+  const rootVi = path.join(process.cwd(), "module-files-vi");
+  const rootEn = path.join(process.cwd(), "module-files-en");
+
+  if (!fs.existsSync(rootVi)) {
+    return jsonBilingual(
+      500,
+      "Thiếu web/module-files-vi — chạy npm run build trong thư mục web (prebuild chạy sync-module).",
+      "Missing web/module-files-vi — run npm run build in web/ (prebuild runs sync-module).",
+    );
+  }
+
+  let root = rootVi;
+  if (LANG_RE.test(lang) && lang === "en") {
+    if (!fs.existsSync(rootEn)) {
+      return jsonBilingual(
+        500,
+        "Thiếu web/module-files-en — chạy npm run build trong thư mục web (prebuild chạy sync-module).",
+        "Missing web/module-files-en — run npm run build in web/ (prebuild runs sync-module).",
+      );
+    }
+    root = rootEn;
   }
 
   const needed = [
@@ -138,8 +156,8 @@ export async function POST(req: Request) {
     if (!fs.existsSync(path.join(root, rel))) {
       return jsonBilingual(
         500,
-        "Thiếu module-files — chạy npm run build trong thư mục web (prebuild đồng bộ + sqlite).",
-        "Missing module-files — run npm run build in web/ (prebuild sync + sqlite).",
+        "Gói module trong thư mục không đủ — chạy npm run build trong web/ (đồng bộ sync-module).",
+        "Incomplete module folder — run npm run build in web/ (sync-module prebuild).",
       );
     }
   }
