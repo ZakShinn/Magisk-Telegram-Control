@@ -1,5 +1,5 @@
 # shellcheck shell=sh
-# /check_sms_on — poll inbox; new inbound SMS → Telegram. /check_sms_off — stop watcher.
+# SMS inbox watcher helpers (periodic poll loop)
 
 CHECK_SMS_WATCH_PID_FILE="${CHECK_SMS_WATCH_PID_FILE:-/data/local/tmp/tg_device_bot_check_sms_watch_pid}"
 CHECK_SMS_WATCH_LAST_TS_FILE="${CHECK_SMS_WATCH_LAST_TS_FILE:-/data/local/tmp/tg_device_bot_check_sms_last_ts}"
@@ -158,54 +158,4 @@ _check_sms_watch_loop() {
 
     rm -f "$CHECK_SMS_WATCH_SORT_TMP"
   done
-}
-
-handle_check_sms_watch_on() {
-  CID="$1"
-  bin="$(_sms_content_bin)"
-  if [ -z "$bin" ]; then
-    send_code "❌ <code>content</code> command not found (PATH / system)."
-    return 1
-  fi
-
-  if [ -f "$CHECK_SMS_WATCH_PID_FILE" ]; then
-    old="$(cat "$CHECK_SMS_WATCH_PID_FILE" 2>/dev/null)"
-    case "$old" in ''|*[!0-9]*) old="" ;; esac
-    if [ -n "$old" ] && kill -0 "$old" 2>/dev/null; then
-      send_code "ℹ️ SMS watch is already <b>on</b>. Use <code>/check_sms_off</code> before enabling again."
-      return 0
-    fi
-    rm -f "$CHECK_SMS_WATCH_PID_FILE"
-  fi
-
-  (_check_sms_watch_loop "$CID") &
-  echo $! > "$CHECK_SMS_WATCH_PID_FILE"
-
-  send_code "✅ SMS watch <b>enabled</b> (poll every <b>${CHECK_SMS_WATCH_INTERVAL}</b>s).
-
-<b>New</b> inbound SMS after this command will be sent here (<code>READ_SMS</code> required).
-
-Stop: <code>/check_sms_off</code>"
-}
-
-handle_check_sms_watch_off() {
-  if [ ! -f "$CHECK_SMS_WATCH_PID_FILE" ]; then
-    send_code "ℹ️ SMS watch is not enabled."
-    return 0
-  fi
-  pid="$(cat "$CHECK_SMS_WATCH_PID_FILE" 2>/dev/null)"
-  case "$pid" in ''|*[!0-9]*) pid="" ;; esac
-  ok=0
-  if [ -n "$pid" ] && kill "$pid" 2>/dev/null; then
-    ok=1
-  fi
-  rm -f "$CHECK_SMS_WATCH_PID_FILE"
-  rm -f "$CHECK_SMS_WATCH_LAST_TS_FILE"
-  rm -f "$CHECK_SMS_WATCH_LAST_TIE_FILE"
-  rm -f "$CHECK_SMS_WATCH_SORT_TMP"
-  if [ "$ok" = 1 ]; then
-    send_code "✅ SMS watch <b>disabled</b>."
-  else
-    send_code "ℹ️ Cleared SMS watch state (process may have already exited)."
-  fi
 }

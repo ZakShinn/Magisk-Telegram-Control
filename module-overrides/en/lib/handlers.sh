@@ -41,8 +41,6 @@ handle_dev() {
 /loop_on &lt;minutes&gt; &lt;command&gt;  - Repeat command every N minutes
 /loop_off                      - Stop all background loops
 
-/check_sms_on   - Enable: forward new inbound SMS to Telegram (periodic inbox poll)
-/check_sms_off  - Disable SMS watch
 EOF
 )"
   send_code "$msg"
@@ -318,14 +316,6 @@ dispatch_command() {
     "/datausage")
       notify_command_received "$TEXT"
       handle_datausage
-      ;;
-    /check_sms_on*)
-      notify_command_received "$TEXT"
-      handle_check_sms_watch_on "$CID"
-      ;;
-    /check_sms_off*)
-      notify_command_received "$TEXT"
-      handle_check_sms_watch_off
       ;;
     /sms*)
       notify_command_received "$TEXT"

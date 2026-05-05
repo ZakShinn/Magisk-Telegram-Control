@@ -1,7 +1,7 @@
 id=TelegramControl
 name=Device control via Telegram
-version=4.2
-versionCode=42
+version=4.19 Final
+versionCode=419
 author=Zakshin (Hai Nghia)
 description=Control your Android device via a Telegram bot. Donate PayPal https://paypal.me/Zakshin · Bank 0968884946
 
