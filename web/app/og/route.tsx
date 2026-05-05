@@ -9,7 +9,7 @@ export const size = {
 
 export const contentType = "image/png";
 
-export default function OgImage() {
+export function GET() {
   return new ImageResponse(
     (
       <div
